@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import { decodeHtmlEntities } from '~/utils/html-entities';
 
-interface ArticleRendererProps {
+export interface ArticleRendererProps {
   content: string;
   originalUrl: string;
   settings: {

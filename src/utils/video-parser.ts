@@ -1,6 +1,6 @@
 /**
- * Заглушка для будущего функционала обработки видео
- * В настоящее время функционал отключен и будет реализован позже
+ * Placeholder for future video processing functionality
+ * This functionality is currently disabled and will be implemented later
  */
 
 export function isVideoUrl(_url: string): boolean {

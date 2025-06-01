@@ -67,8 +67,9 @@ export function setTokenCookie(token: string): void {
       maxAge: 60 * 60 * 24 * 7,
       sameSite: 'lax',
     });
-  } catch {
-    console.error('Failed to set cookie');
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to set cookie';
+    console.error(errorMessage);
   }
 }
 
@@ -77,9 +78,11 @@ export function setTokenCookie(token: string): void {
  */
 export function getTokenFromCookies(): string | undefined {
   try {
-    return cookies().get('auth_token')?.value;
-  } catch {
-    console.error('Failed to get cookie');
+    const cookieValue = cookies().get('auth_token');
+    return cookieValue?.value;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to get cookie';
+    console.error(errorMessage);
     return undefined;
   }
 }
@@ -90,8 +93,9 @@ export function getTokenFromCookies(): string | undefined {
 export function removeTokenCookie(): void {
   try {
     cookies().delete('auth_token');
-  } catch {
-    console.error('Failed to delete cookie');
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to delete cookie';
+    console.error(errorMessage);
   }
 }
 

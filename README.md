@@ -2,24 +2,22 @@
 
 A clean, distraction-free article reading application that lets you save and read articles from the web with a beautiful, customizable reading experience.
 
-![Reader App](public/reader-app-preview.png)
-
 ## Features
 
-- 📚 Save articles from across the web
-- 🔍 Clean, distraction-free reading experience
-- 🎨 Customizable typography and layout
-- 🔒 User authentication system
-- 📱 Responsive design for all devices
-- 🌓 Font size and family customization
-- 🧩 Table of contents for longer articles
-- 🎬 Toggle images and videos for distraction-free reading
+- Save articles from across the web
+- Clean, distraction-free reading experience
+- Customizable typography and layout
+- User authentication system
+- Responsive design for all devices
+- Font size and family customization
+- Table of contents for longer articles
+- Toggle images for distraction-free reading
 
 ## Tech Stack
 
 - **Framework**: Next.js 15
 - **Language**: TypeScript
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: SQLite with Prisma ORM
 - **Authentication**: Custom JWT-based auth
 - **Styling**: Tailwind CSS
 - **API**: tRPC for type-safe APIs
@@ -30,7 +28,7 @@ A clean, distraction-free article reading application that lets you save and rea
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
+- SQLite database
 
 ### Installation
 
@@ -50,7 +48,7 @@ A clean, distraction-free article reading application that lets you save and rea
    cp .env.example .env.local
    ```
    
-4. Update the `.env.local` file with your PostgreSQL database URL and JWT secret.
+4. Update the `.env.local` file with your database URL and JWT secret.
 
 5. Set up the database:
    ```bash

@@ -6,9 +6,8 @@ import { useSavedArticles } from '~/utils/use-saved-articles';
 import { Readability } from '@mozilla/readability';
 import { ChevronLeftIcon, ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { ContentLoader } from '~/components/LoadingSpinner';
-import { ArticleRenderer } from '~/components/ArticleRenderer';
+import { ArticleRenderer, type ArticleRendererProps } from '~/components/ArticleRenderer';
 import { FloatingSettingsButton } from '~/components/FloatingSettingsButton';
-import { replaceVideoLinksWithEmbeds } from '~/utils/video-parser';
 import { ArticleHeader } from '~/components/ArticleHeader';
 import { ArticleTableOfContents } from '~/components/ArticleTableOfContents';
 
@@ -30,25 +29,16 @@ interface ParseResponse {
   error?: string;
 }
 
-const DEFAULT_SETTINGS = {
+type ReaderSettings = ArticleRendererProps['settings'];
+
+const DEFAULT_SETTINGS: ReaderSettings = {
   fontSize: 18,
-  fontFamily: 'PT Serif' as const,
+  fontFamily: 'PT Serif',
   lineHeight: 1.6,
-  textAlign: 'left' as const,
+  textAlign: 'left',
   showImages: true,
   showVideos: true,
 };
-
-
-type Settings = {
-  fontSize: number;
-  fontFamily: string;
-  lineHeight: number;
-  textAlign: string;
-  showImages: boolean;
-  showVideos: boolean;
-};
-
 
 function extractPublishedTime(html: string): string | null {
   
@@ -107,13 +97,13 @@ export default function ArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [settings, setSettings] = useState<Settings>(() => {
+  const [settings, setSettings] = useState<ReaderSettings>(() => {
     
     if (typeof window !== 'undefined') {
       const savedSettings = localStorage.getItem('readerSettings');
       if (savedSettings) {
         try {
-          return JSON.parse(savedSettings) as Settings;
+          return JSON.parse(savedSettings) as ReaderSettings;
         } catch (e) {
           console.error('Error parsing reader settings:', e);
         }
@@ -157,19 +147,17 @@ export default function ArticlePage() {
           
           if (parsedArticle) {
             
-            const processedContent = replaceVideoLinksWithEmbeds(parsedArticle.content ?? '');
-            
-            const publishedTime = extractPublishedTime(data.html);
-            
-            articleCache.set(url, {
+            const articleContent: ArticleContent = {
               title: parsedArticle.title ?? 'Untitled',
-              content: processedContent,
+              content: parsedArticle.content ?? '',
               byline: parsedArticle.byline,
               siteName: parsedArticle.siteName,
               excerpt: parsedArticle.excerpt,
-              publishedTime: publishedTime,
+              publishedTime: extractPublishedTime(data.html),
               lang: parsedArticle.lang,
-            });
+            };
+            
+            articleCache.set(url, articleContent);
           }
         })
         .catch(err => console.error('Error prefetching article:', err));
@@ -195,10 +183,8 @@ export default function ArticlePage() {
       setIsLoading(true);
       setError(null);
       
-      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); 
-      
       
       const response = await fetch(`/api/parse?url=${encodeURIComponent(url)}`, {
         signal: controller.signal
@@ -213,10 +199,8 @@ export default function ArticlePage() {
       
       const data = await response.json() as ParseResponse;
       
-      
       const parser = new DOMParser();
       const doc = parser.parseFromString(data.html, 'text/html');
-      
       
       const reader = new Readability(doc);
       const parsedArticle = reader.parse();
@@ -225,22 +209,15 @@ export default function ArticlePage() {
         throw new Error('Failed to parse article content');
       }
       
-      
-      const processedContent = replaceVideoLinksWithEmbeds(parsedArticle.content ?? '');
-      
-      
-      const publishedTime = extractPublishedTime(data.html);
-      
       const articleContent: ArticleContent = {
         title: parsedArticle.title ?? 'Untitled',
-        content: processedContent,
+        content: parsedArticle.content ?? '',
         byline: parsedArticle.byline,
         siteName: parsedArticle.siteName,
         excerpt: parsedArticle.excerpt,
-        publishedTime: publishedTime,
+        publishedTime: extractPublishedTime(data.html),
         lang: parsedArticle.lang,
       };
-      
       
       articleCache.set(url, articleContent);
       
@@ -315,7 +292,7 @@ export default function ArticlePage() {
     };
   }, [articles, decodedUrl, handleGoBack, navigateToArticle]);
   
-  const handleSettingsChange = (newSettings: typeof settings) => {
+  const handleSettingsChange = (newSettings: ReaderSettings) => {
     setSettings(newSettings);
   };
   
@@ -389,7 +366,11 @@ export default function ArticlePage() {
       
       {/* Article content */}
       <div ref={articleContentRef}>
-        <ArticleRenderer content={article.content} settings={settings} />
+        <ArticleRenderer
+          content={article.content}
+          settings={settings}
+          originalUrl={decodedUrl}
+        />
       </div>
       
       {/* Navigation between articles */}

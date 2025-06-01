@@ -5,7 +5,7 @@ interface Settings {
   fontSize: number;
   fontFamily: string;
   lineHeight: number;
-  textAlign: string;
+  textAlign: "left" | "center" | "right" | "justify";
   showImages: boolean;
   showVideos: boolean;
 }
@@ -58,13 +58,6 @@ export function FloatingSettingsButton({
     onSettingsChange({
       ...settings,
       showImages: value,
-    });
-  };
-
-  const handleShowVideosChange = (value: boolean) => {
-    onSettingsChange({
-      ...settings,
-      showVideos: value,
     });
   };
 
