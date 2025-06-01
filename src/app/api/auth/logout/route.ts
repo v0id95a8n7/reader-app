@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { removeAuthCookie } from '~/utils/auth';
+import { removeTokenCookie } from '~/utils/auth';
 
 
 export async function POST(_request: NextRequest) {
@@ -8,7 +8,7 @@ export async function POST(_request: NextRequest) {
     const response = NextResponse.json({ success: true });
     
     
-    removeAuthCookie(response);
+    removeTokenCookie();
     
     return response;
   } catch (error) {
