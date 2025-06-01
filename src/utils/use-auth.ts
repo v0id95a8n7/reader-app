@@ -25,7 +25,7 @@ interface UseAuth {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, redirect?: string | null) => Promise<void>;
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -39,20 +39,24 @@ export function useAuth(): UseAuth {
   });
   const router = useRouter();
 
-  
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        console.log('Fetching current user...');
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
         
         if (response.ok) {
           const data = await response.json() as AuthResponse;
+          console.log('User data received:', data);
           setAuthState({
             user: data.user,
             isLoading: false,
             error: null,
           });
         } else {
+          console.log('Not logged in');
           setAuthState({
             user: null,
             isLoading: false,
@@ -72,30 +76,48 @@ export function useAuth(): UseAuth {
     void fetchCurrentUser();
   }, []);
 
-  
-  const login = async (email: string, password: string) => {
+  const navigateTo = (path: string) => {
+    console.log('Navigating to:', path);
+    
+    // Программное перенаправление с помощью window.location
+    window.location.href = path;
+  };
+
+  const login = async (email: string, password: string, redirect?: string | null) => {
     setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      console.log('Attempting login...');
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include'
       });
       
       const data = await response.json() as AuthResponse | ErrorResponse;
       
       if (response.ok) {
+        console.log('Login successful:', data);
         setAuthState({
           user: (data as AuthResponse).user,
           isLoading: false,
           error: null,
         });
         
-        router.push('/');
+        console.log('Login successful, redirecting to', redirect || '/');
+        
+        // Перенаправление на запрошенную страницу или домашнюю страницу
+        if (redirect) {
+          const decodedRedirect = decodeURIComponent(redirect);
+          navigateTo(decodedRedirect);
+        } else {
+          navigateTo('/');
+        }
       } else {
+        console.error('Login failed:', data);
         setAuthState(prev => ({
           ...prev,
           isLoading: false,
@@ -112,30 +134,34 @@ export function useAuth(): UseAuth {
     }
   };
 
-  
   const register = async (email: string, password: string, name?: string) => {
     setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      console.log('Attempting registration...');
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password, name }),
+        credentials: 'include'
       });
       
       const data = await response.json() as AuthResponse | ErrorResponse;
       
       if (response.ok) {
+        console.log('Registration successful:', data);
         setAuthState({
           user: (data as AuthResponse).user,
           isLoading: false,
           error: null,
         });
         
-        router.push('/');
+        console.log('Registration successful, redirecting to home');
+        navigateTo('/');
       } else {
+        console.error('Registration failed:', data);
         setAuthState(prev => ({
           ...prev,
           isLoading: false,
@@ -152,13 +178,14 @@ export function useAuth(): UseAuth {
     }
   };
 
-  
   const logout = async () => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     try {
+      console.log('Attempting logout...');
       await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include'
       });
       
       setAuthState({
@@ -167,8 +194,8 @@ export function useAuth(): UseAuth {
         error: null,
       });
       
-      
-      router.push('/login');
+      console.log('Logout successful, redirecting to login');
+      navigateTo('/login');
     } catch (error) {
       console.error('Logout error:', error);
       setAuthState(prev => ({
@@ -179,7 +206,6 @@ export function useAuth(): UseAuth {
     }
   };
 
-  
   const clearError = () => {
     setAuthState(prev => ({ ...prev, error: null }));
   };

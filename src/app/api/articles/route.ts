@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     
     
     const articles = await db.savedArticle.findMany({
-      where: { userId: currentUser.userId },
+      where: { userId: currentUser.id },
       orderBy: { date: 'desc' },
       select: {
         id: true,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     
     const existingArticle = await db.savedArticle.findFirst({
       where: {
-        userId: currentUser.userId,
+        userId: currentUser.id,
         url,
       },
     });
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         url,
         title,
         excerpt,
-        userId: currentUser.userId,
+        userId: currentUser.id,
       },
     });
     

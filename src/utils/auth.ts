@@ -1,7 +1,8 @@
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
-import { type NextRequest } from 'next/server';
+import { type NextRequest, type NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { type CookieOptions } from 'next/dist/server/web/spec-extension/cookies';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'your-secret-key';
 
@@ -11,6 +12,7 @@ interface JWTPayload {
   id: string;
   name?: string;
   email: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -47,56 +49,60 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
-    return payload as JWTPayload;
+    return payload as unknown as JWTPayload;
   } catch {
     return null;
   }
 }
 
 /**
- * Set JWT token in cookie
+ * Set JWT token in cookie - используется на сервере
+ * Эта функция оставлена для обратной совместимости, но лучше использовать setAuthCookie
  */
 export function setTokenCookie(token: string): void {
-  try {
-    cookies().set({
-      name: 'auth_token',
-      value: token,
-      httpOnly: true,
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-    });
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to set cookie';
-    console.error(errorMessage);
-  }
+  const cookieOptions: CookieOptions = {
+    name: 'auth_token',
+    value: token,
+    httpOnly: true,
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: 'lax',
+  };
+  
+  void cookies().set(cookieOptions);
+}
+
+/**
+ * Set JWT token in cookie for NextResponse
+ */
+export function setAuthCookie(response: NextResponse, token: string): NextResponse {
+  response.cookies.set({
+    name: 'auth_token',
+    value: token,
+    httpOnly: true,
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: 'lax',
+  });
+  return response;
 }
 
 /**
  * Get JWT token from cookie
  */
 export function getTokenFromCookies(): string | undefined {
-  try {
-    const cookieValue = cookies().get('auth_token');
-    return cookieValue?.value;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to get cookie';
-    console.error(errorMessage);
-    return undefined;
-  }
+  const cookieStore = cookies();
+  const cookieValue = cookieStore.get('auth_token');
+  return cookieValue?.value;
 }
 
 /**
  * Remove JWT token from cookie
  */
 export function removeTokenCookie(): void {
-  try {
-    cookies().delete('auth_token');
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to delete cookie';
-    console.error(errorMessage);
-  }
+  void cookies().delete('auth_token');
 }
 
 /**

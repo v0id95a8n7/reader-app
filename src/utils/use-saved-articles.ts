@@ -36,6 +36,7 @@ export function useSavedArticles(): UseSavedArticles {
   const fetchArticles = useCallback(async () => {
     if (!user) {
       setArticles([]);
+      setIsLoading(false);
       return;
     }
     
@@ -43,13 +44,18 @@ export function useSavedArticles(): UseSavedArticles {
     setError(null);
     
     try {
-      const response = await fetch('/api/articles');
+      console.log('Fetching saved articles for user:', user.id);
+      const response = await fetch('/api/articles', {
+        credentials: 'include'
+      });
       
       if (response.ok) {
         const data = await response.json() as ArticlesResponse;
+        console.log('Received articles:', data.articles.length);
         setArticles(data.articles);
       } else {
         const errorData = await response.json() as ErrorResponse;
+        console.error('Failed to fetch articles:', errorData);
         setError(errorData.error ?? 'Failed to fetch articles');
       }
     } catch (error) {
@@ -75,19 +81,23 @@ export function useSavedArticles(): UseSavedArticles {
     setError(null);
 
     try {
+      console.log('Saving article for user:', user.id, article);
       const response = await fetch('/api/articles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(article),
+        credentials: 'include'
       });
       
       if (response.ok) {
         const savedArticle = await response.json() as Article;
+        console.log('Article saved successfully:', savedArticle);
         setArticles(prev => [...prev, savedArticle]);
       } else {
         const errorData = await response.json() as ErrorResponse;
+        console.error('Failed to save article:', errorData);
         setError(errorData.error ?? 'Failed to save article');
       }
     } catch (error) {
@@ -109,14 +119,18 @@ export function useSavedArticles(): UseSavedArticles {
     setError(null);
 
     try {
+      console.log('Deleting article for user:', user.id, 'article ID:', id);
       const response = await fetch(`/api/articles/${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       });
       
       if (response.ok) {
+        console.log('Article deleted successfully');
         setArticles(prev => prev.filter(article => article.id !== id));
       } else {
         const errorData = await response.json() as ErrorResponse;
+        console.error('Failed to delete article:', errorData);
         setError(errorData.error ?? 'Failed to delete article');
       }
     } catch (error) {

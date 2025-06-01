@@ -1,14 +1,19 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { removeTokenCookie } from '~/utils/auth';
-
 
 export async function POST(_request: NextRequest) {
   try {
     const response = NextResponse.json({ success: true });
     
-    
-    removeTokenCookie();
+    // Удаление куки аутентификации через установку пустого значения и срока действия в прошлом
+    response.cookies.set({
+      name: 'auth_token',
+      value: '',
+      expires: new Date(0), // Срок в прошлом - 1970-01-01
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+    });
     
     return response;
   } catch (error) {

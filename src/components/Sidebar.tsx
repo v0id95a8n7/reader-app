@@ -299,26 +299,6 @@ export const Sidebar = memo(function Sidebar({
           </div>
         )}
       </div>
-      
-      {/* User Profile */}
-      <div className="p-4 bg-gray-50 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gray-200 p-2 rounded-md">
-              <UserIcon className="h-4 w-4 text-gray-500" />
-            </div>
-            <div className="text-sm text-gray-600 font-medium truncate max-w-[140px] font-nunito">
-              {currentUser}
-            </div>
-          </div>
-          <button
-            onClick={() => void onLogout()}
-            className="text-xs text-gray-500 hover:text-gray-700 transition-all duration-200 px-3 py-1.5 bg-white border border-gray-200 hover:border-gray-300 shadow-sm font-nunito rounded cursor-pointer"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
     </div>
   );
 });

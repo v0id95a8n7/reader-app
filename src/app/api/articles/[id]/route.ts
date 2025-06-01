@@ -1,20 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getCurrentUser } from '~/utils/auth';
+import { db } from '~/server/db';
 
-const prisma = new PrismaClient();
-
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-
-export async function DELETE(request: NextRequest, context: Context) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = context.params;
-    
+    const { id } = params;
     
     const currentUser = await getCurrentUser(request);
     
@@ -25,8 +18,7 @@ export async function DELETE(request: NextRequest, context: Context) {
       );
     }
     
-    
-    const article = await prisma.savedArticle.findUnique({
+    const article = await db.savedArticle.findUnique({
       where: { id },
     });
     
@@ -37,15 +29,14 @@ export async function DELETE(request: NextRequest, context: Context) {
       );
     }
     
-    if (article.userId !== currentUser.userId) {
+    if (article.userId !== currentUser.id) {
       return NextResponse.json(
         { error: 'You do not have permission to delete this article' },
         { status: 403 }
       );
     }
     
-    
-    await prisma.savedArticle.delete({
+    await db.savedArticle.delete({
       where: { id },
     });
     
@@ -56,7 +47,5 @@ export async function DELETE(request: NextRequest, context: Context) {
       { error: 'An unexpected error occurred' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 

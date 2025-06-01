@@ -15,12 +15,6 @@ export default function HomePage() {
         <p className="text-gray-500 mb-10 text-xl font-nunito">
           Select an article from the sidebar or add a new one to start reading.
         </p>
-        
-        <div className="bg-gray-100 p-6 shadow-sm border border-gray-200 rounded-lg">
-          <p className="text-sm text-gray-500 italic font-nunito">
-            Your articles will appear in the sidebar on the left.
-          </p>
-        </div>
       </div>
     </div>
   );

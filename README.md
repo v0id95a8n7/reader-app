@@ -6,22 +6,23 @@ A clean, distraction-free article reading application that lets you save and rea
 
 - Save articles from across the web
 - Clean, distraction-free reading experience
-- Customizable typography and layout
-- User authentication system
 - Responsive design for all devices
-- Font size and family customization
-- Table of contents for longer articles
-- Toggle images for distraction-free reading
+- User authentication system with JWT tokens
+- Article parsing using Mozilla's Readability
+- Customizable reading preferences
+- Article management (save, delete)
+- Auto-fetch article details from URLs
 
 ## Tech Stack
 
 - **Framework**: Next.js 15
 - **Language**: TypeScript
 - **Database**: SQLite with Prisma ORM
-- **Authentication**: Custom JWT-based auth
+- **Authentication**: Custom JWT-based auth with jose
 - **Styling**: Tailwind CSS
 - **API**: tRPC for type-safe APIs
 - **Content Parsing**: Mozilla Readability
+- **DOM Sanitization**: DOMPurify
 
 ## Getting Started
 
@@ -62,6 +63,31 @@ A clean, distraction-free article reading application that lets you save and rea
 
 7. Open [http://localhost:3000](http://localhost:3000) to see the application.
 
+## Development
+
+```bash
+# Run development server
+npm run dev
+
+# Check for linting errors
+npm run lint
+
+# Fix linting errors
+npm run lint:fix
+
+# Type check
+npm run typecheck
+
+# Format code
+npm run format:write
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+```
+
 ## Production Deployment
 
 1. Build the application:
@@ -74,12 +100,20 @@ A clean, distraction-free article reading application that lets you save and rea
    npm run start
    ```
 
+## Project Structure
+
+- `/src/app` - Next.js app router files
+- `/src/components` - Reusable React components
+- `/src/utils` - Utility functions
+- `/src/server` - Server-side code and API routes
+- `/prisma` - Database schema and migrations
+
 ## How It Works
 
 1. **User Authentication**: Register and login to access your saved articles.
 2. **Article Parsing**: Enter any URL, and the app will extract the main content using Mozilla's Readability.
 3. **Saving Articles**: Articles are saved to your profile and accessible anytime.
-4. **Reading Experience**: Enjoy a clean, customizable reading experience with adjustable fonts, sizes, and layout.
+4. **Reading Experience**: Enjoy a clean, customizable reading experience.
 
 ## License
 

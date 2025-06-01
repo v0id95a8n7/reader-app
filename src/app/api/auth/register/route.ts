@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { hashPassword, createToken, setTokenCookie } from '~/utils/auth';
+import { hashPassword, createToken, setAuthCookie } from '~/utils/auth';
 import { db } from '~/server/db';
 
 
@@ -56,15 +56,15 @@ export async function POST(request: NextRequest) {
     });
 
     
-    setTokenCookie(token);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
       },
     });
+    
+    return setAuthCookie(response, token);
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(

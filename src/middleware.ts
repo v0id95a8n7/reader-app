@@ -2,48 +2,61 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from '~/utils/auth';
 
-
-const publicRoutes = ['/login', '/register', '/api/auth/login', '/api/auth/register'];
+export const config = {
+  matcher: [
+    /*
+     * Exclude from checking:
+     * - API routes (for auth API)
+     * - Static files (including favicons, images, etc.)
+     * - Authentication routes
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|login|register).*)',
+  ],
+};
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  console.log(`[Middleware] Checking auth for path: ${pathname}`);
   
   const token = request.cookies.get('auth_token')?.value;
-  const { pathname } = request.nextUrl;
   
-  
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-  
-  
-  if (pathname.startsWith('/api') && !pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
-  }
-  
-  
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
-  
-  
-  if (!token || !(await verifyToken(token))) {
+  if (!token) {
+    console.log('[Middleware] No auth token found, redirecting to login');
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', encodeURIComponent(pathname));
     return NextResponse.redirect(url);
   }
   
-  
-  return NextResponse.next();
-}
-
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
-  ],
-}; 
+  try {
+    const payload = await verifyToken(token);
+    
+    if (!payload) {
+      console.log('[Middleware] Invalid auth token, redirecting to login');
+      if (pathname === '/') {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
+      
+      const url = new URL('/login', request.url);
+      url.searchParams.set('redirect', encodeURIComponent(pathname));
+      return NextResponse.redirect(url);
+    }
+    
+    console.log(`[Middleware] Auth successful for user: ${payload.email}`);
+    
+    return NextResponse.next();
+  } catch (error) {
+    console.error('[Middleware] Auth error:', error);
+    
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    
+    const url = new URL('/login', request.url);
+    url.searchParams.set('redirect', encodeURIComponent(pathname));
+    return NextResponse.redirect(url);
+  }
+} 

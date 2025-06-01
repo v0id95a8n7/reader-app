@@ -87,7 +87,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {user && (
             <button
               onClick={handleLogout}
-              className="px-4 py-2 rounded-md hover:bg-gray-100 flex items-center gap-2"
+              className="px-4 py-2 rounded-md hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
               <span className="hidden sm:inline text-gray-600">Sign out</span>

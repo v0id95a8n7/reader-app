@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
 import { SmallLoader } from '~/components/LoadingSpinner';
@@ -12,7 +11,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,31 +18,19 @@ export default function RegisterPage() {
     setError(null);
 
     try {
+      console.log('Attempting registration...');
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name, email, password }),
+        credentials: 'include'
       });
 
       if (response.ok) {
-        
-        const loginResponse = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (loginResponse.ok) {
-          router.push('/');
-          router.refresh();
-        } else {
-          
-          router.push('/login');
-        }
+        console.log('Registration successful, redirecting to home');
+        window.location.href = '/';
       } else {
         const data = await response.json() as { error?: string };
         throw new Error(data.error ?? 'Registration failed');
@@ -58,37 +44,35 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffcf2] flex flex-col justify-center">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <BookOpenIcon className="h-16 w-16 text-[#eb5e28]" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-nunito">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="flex justify-center">
+            <div className="bg-white p-3 rounded-md shadow-sm">
+              <BookOpenIcon className="h-12 w-12 text-gray-500" />
+            </div>
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-700">
+            Create your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Or{' '}
+            <Link href="/login" className="font-medium text-gray-700 hover:text-gray-900">
+              sign in to your account
+            </Link>
+          </p>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-[#252422]">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-[#403d39]">
-          Or{' '}
-          <Link href="/login" className="font-medium text-[#eb5e28] hover:text-[#d04718]">
-            sign in to your account
-          </Link>
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[#252422] py-8 px-4 shadow-custom sm:rounded-lg sm:px-10">
+        <div className="mt-8">
           {error && (
-            <div className="mb-4 bg-[#403d39] border-l-4 border-[#eb5e28] p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <p className="text-sm text-[#eb5e28]">{error}</p>
-                </div>
-              </div>
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md relative" role="alert">
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#ccc5b9]">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Name
               </label>
               <div className="mt-1">
@@ -100,13 +84,13 @@ export default function RegisterPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-[#403d39] border border-[#504a45] text-[#fffcf2] rounded-md shadow-sm placeholder-[#ccc5b9] focus:outline-none focus:ring-2 focus:ring-[#eb5e28] focus:border-[#eb5e28] sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#ccc5b9]">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
               <div className="mt-1">
@@ -118,13 +102,13 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-[#403d39] border border-[#504a45] text-[#fffcf2] rounded-md shadow-sm placeholder-[#ccc5b9] focus:outline-none focus:ring-2 focus:ring-[#eb5e28] focus:border-[#eb5e28] sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#ccc5b9]">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
               <div className="mt-1">
@@ -136,7 +120,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-[#403d39] border border-[#504a45] text-[#fffcf2] rounded-md shadow-sm placeholder-[#ccc5b9] focus:outline-none focus:ring-2 focus:ring-[#eb5e28] focus:border-[#eb5e28] sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -145,12 +129,10 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-[#fffcf2] bg-[#eb5e28] hover:bg-[#d04718] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#eb5e28] disabled:opacity-50"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <SmallLoader />
-                  </div>
+                  <SmallLoader />
                 ) : (
                   'Create account'
                 )}
