@@ -10,6 +10,7 @@ import { ArticleRenderer, type ArticleRendererProps } from '~/components/Article
 import { FloatingSettingsButton } from '~/components/FloatingSettingsButton';
 import { ArticleHeader } from '~/components/ArticleHeader';
 import { ArticleTableOfContents } from '~/components/ArticleTableOfContents';
+import { FloatingButtons } from '~/components/FloatingButtons';
 
 interface ArticleContent {
   title: string;
@@ -97,35 +98,73 @@ export default function ArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [settings, setSettings] = useState<ReaderSettings>(() => {
-    
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('readerSettings');
-      if (savedSettings) {
-        try {
-          return JSON.parse(savedSettings) as ReaderSettings;
-        } catch (e) {
-          console.error('Error parsing reader settings:', e);
-        }
-      }
-    }
-    return DEFAULT_SETTINGS;
-  });
+  const [settings, setSettings] = useState<ReaderSettings>(DEFAULT_SETTINGS);
+  const [isSettingsSaved, setIsSettingsSaved] = useState(false);
   
   const router = useRouter();
   const params = useParams();
   const { articles } = useSavedArticles();
-  
   
   const urlParam = params.url as string;
   const decodedUrl = decodeURIComponent(urlParam);
   
   const articleContentRef = useRef<HTMLDivElement>(null);
   
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+          setIsSettingsSaved(true);
+        } else {
+          const savedSettings = localStorage.getItem('readerSettings');
+          if (savedSettings) {
+            try {
+              setSettings(JSON.parse(savedSettings) as ReaderSettings);
+            } catch (e) {
+              console.error('Error parsing reader settings:', e);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        const savedSettings = localStorage.getItem('readerSettings');
+        if (savedSettings) {
+          try {
+            setSettings(JSON.parse(savedSettings) as ReaderSettings);
+          } catch (e) {
+            console.error('Error parsing reader settings:', e);
+          }
+        }
+      }
+    };
+
+    void fetchSettings();
+  }, []);
   
   useEffect(() => {
     localStorage.setItem('readerSettings', JSON.stringify(settings));
-  }, [settings]);
+    
+    const saveSettings = async () => {
+      if (isSettingsSaved) {
+        try {
+          await fetch('/api/settings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(settings),
+          });
+        } catch (error) {
+          console.error('Error saving settings:', error);
+        }
+      }
+    };
+    
+    void saveSettings();
+  }, [settings, isSettingsSaved]);
   
   const handleGoBack = useCallback(() => {
     startTransition(() => {
@@ -294,6 +333,30 @@ export default function ArticlePage() {
   
   const handleSettingsChange = (newSettings: ReaderSettings) => {
     setSettings(newSettings);
+    setIsSettingsSaved(true);
+  };
+  
+  const handleScrollToTop = () => {
+    if (articleContentRef.current) {
+      articleContentRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  const handleLinkClick = (url: string) => {
+    if (url.startsWith('#')) {
+      // Внутренняя ссылка - перемещаемся к элементу
+      const elementId = url.substring(1);
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (url.startsWith('http')) {
+      // Внешняя ссылка - открываем в новом окне
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Относительная ссылка - пока ничего не делаем
+      console.log('Relative link clicked:', url);
+    }
   };
   
   
@@ -341,74 +404,100 @@ export default function ArticlePage() {
   }
   
   return (
-    <>
-      <ArticleHeader 
-        title={article.title}
-        byline={article.byline ?? null}
-        siteName={article.siteName ?? null}
-        publishedTime={article.publishedTime ?? null}
-        excerpt={article.excerpt ?? null}
-        url={decodedUrl}
-        settings={{
-          fontSize: settings.fontSize,
-          fontFamily: settings.fontFamily
-        }}
-      />
-      
-      {/* Table of contents */}
-      <ArticleTableOfContents 
-        containerRef={articleContentRef} 
-        settings={{
-          fontSize: settings.fontSize,
-          fontFamily: settings.fontFamily
-        }}
-      />
-      
-      {/* Article content */}
-      <div ref={articleContentRef}>
-        <ArticleRenderer
-          content={article.content}
-          settings={settings}
-          originalUrl={decodedUrl}
-        />
-      </div>
-      
-      {/* Navigation between articles */}
-      <div className="article-navigation mt-8 pt-4 border-t border-gray-200 flex justify-between">
-        {prevArticle && (
+    <div className="max-w-full" ref={articleContentRef}>
+      {isLoading ? (
+        <ContentLoader />
+      ) : error ? (
+        <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <h2 className="text-lg font-bold mb-2">Error Loading Article</h2>
+          <p>{error}</p>
           <button
-            onClick={() => navigateToArticle(prevArticle.url)}
-            className="flex items-center space-x-2 bg-gray-500 text-white py-2 px-4 transition-all duration-200 shadow-sm font-nunito hover:bg-gray-600 rounded-md cursor-pointer"
+            onClick={handleGoBack}
+            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
           >
-            <ChevronLeftIcon className="h-5 w-5" />
-            <span>Previous Article</span>
+            Go Back
           </button>
-        )}
-        
-        <button
-          onClick={handleGoBack}
-          className="flex items-center space-x-2 bg-gray-500 text-white py-2 px-4 transition-all duration-200 shadow-sm font-nunito hover:bg-gray-600 rounded-md cursor-pointer"
-        >
-          <HomeIcon className="h-5 w-5" />
-          <span>Home</span>
-        </button>
-        
-        {nextArticle && (
-          <button
-            onClick={() => navigateToArticle(nextArticle.url)}
-            className="flex items-center space-x-2 bg-gray-500 text-white py-2 px-4 transition-all duration-200 shadow-sm font-nunito hover:bg-gray-600 rounded-md cursor-pointer"
-          >
-            <span>Next Article</span>
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
-        )}
-      </div>
-      
-      {/* Floating Settings Button */}
-      <FloatingSettingsButton
-        settings={settings}
-        onSettingsChange={handleSettingsChange}
-      />
-    </>
+        </div>
+      ) : article ? (
+        <>
+          <div className="relative">
+            <div className="mb-6 flex items-center">
+              <button
+                onClick={handleGoBack}
+                className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Go back"
+              >
+                <ChevronLeftIcon className="h-5 w-5 text-gray-500" />
+              </button>
+              
+              {prevArticle && (
+                <button
+                  onClick={() => navigateToArticle(prevArticle.url)}
+                  className="mr-auto p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Previous article"
+                >
+                  <ChevronLeftIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              )}
+              
+              <button
+                onClick={handleGoBack}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Home"
+              >
+                <HomeIcon className="h-5 w-5 text-gray-500" />
+              </button>
+              
+              {nextArticle && (
+                <button
+                  onClick={() => navigateToArticle(nextArticle.url)}
+                  className="ml-auto p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Next article"
+                >
+                  <ChevronRightIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              )}
+            </div>
+            
+            <ArticleHeader
+              title={article.title}
+              byline={article.byline}
+              siteName={article.siteName}
+              publishedTime={article.publishedTime}
+              excerpt={article.excerpt}
+              url={decodedUrl}
+              settings={settings}
+            />
+            
+            <div className="flex gap-8 mt-8">
+              <div className="w-48 flex-shrink-0 hidden lg:block">
+                <ArticleTableOfContents 
+                  containerRef={articleContentRef}
+                  settings={{
+                    fontSize: settings.fontSize,
+                    fontFamily: settings.fontFamily
+                  }}
+                />
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <ArticleRenderer
+                  content={article.content}
+                  settings={settings}
+                  originalUrl={decodedUrl}
+                  onLinkClick={handleLinkClick}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <FloatingButtons
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
+            onScrollToTop={handleScrollToTop}
+          />
+        </>
+      ) : null}
+    </div>
   );
 }
