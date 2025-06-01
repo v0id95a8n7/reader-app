@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { hashPassword, createToken, setAuthCookie } from '~/utils/auth';
+import { hashPassword, createToken, setTokenCookie } from '~/utils/auth';
 import { db } from '~/server/db';
 
 
@@ -50,23 +50,21 @@ export async function POST(request: NextRequest) {
 
     
     const token = await createToken({
-      userId: user.id,
+      id: user.id,
       email: user.email,
+      ...(user.name ? { name: user.name } : {})
     });
 
     
-    const response = NextResponse.json({
+    setTokenCookie(token);
+
+    return NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
       },
     });
-
-    
-    setAuthCookie(response, token);
-
-    return response;
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(

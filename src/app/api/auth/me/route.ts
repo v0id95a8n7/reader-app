@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { db } from '~/server/db';
 import { getCurrentUser } from '~/utils/auth';
-
-const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
-    
     const currentUser = await getCurrentUser(request);
     
     if (!currentUser) {
@@ -16,9 +13,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    
-    const user = await prisma.user.findUnique({
-      where: { id: currentUser.userId },
+    const user = await db.user.findUnique({
+      where: { id: currentUser.id },
       select: {
         id: true,
         email: true,
@@ -40,7 +36,5 @@ export async function GET(request: NextRequest) {
       { error: 'An unexpected error occurred' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 
