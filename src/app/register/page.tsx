@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { SmallLoader } from "~/components/LoadingSpinner";
+import { signIn, useSession } from "next-auth/react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -11,6 +13,17 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  console.log("Register page - session status:", status, "session:", session);
+
+  // Если пользователь уже авторизован, перенаправляем на главную
+  useEffect(() => {
+    if (session?.user && status === "authenticated") {
+      router.push("/");
+    }
+  }, [session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,21 +31,39 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      console.log("Attempting registration...");
+      console.log("Attempting registration with:", { email, name, passwordProvided: !!password });
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }),
-        credentials: "include",
       });
 
+      const data = await response.json();
+      console.log("Registration response:", response.status, data);
+
       if (response.ok) {
-        console.log("Registration successful, redirecting to home");
-        window.location.href = "/";
+        console.log("Registration successful, signing in...");
+        
+        // Автоматически входим после успешной регистрации
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
+        
+        console.log("SignIn result after registration:", result);
+        
+        if (result?.error) {
+          console.error("Login after registration failed:", result.error);
+          setError(result.error);
+        } else {
+          console.log("Login after registration successful, redirecting...");
+          router.push("/");
+        }
       } else {
-        const data = (await response.json()) as { error?: string };
+        console.error("Registration failed:", data);
         throw new Error(data.error ?? "Registration failed");
       }
     } catch (error) {

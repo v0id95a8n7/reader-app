@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "~/utils/auth";
+import { getServerSession } from "../auth/[...nextauth]/route";
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("Parse API - session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

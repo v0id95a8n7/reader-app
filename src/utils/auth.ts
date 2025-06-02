@@ -28,7 +28,15 @@ export async function comparePasswords(
   password: string,
   hash: string,
 ): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  console.log("Comparing password:", password ? "provided" : "missing", "hash:", hash ? "provided" : "missing");
+  try {
+    const result = await bcrypt.compare(password, hash);
+    console.log("Password comparison result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    return false;
+  }
 }
 
 /**

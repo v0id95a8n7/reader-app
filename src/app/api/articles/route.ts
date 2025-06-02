@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "~/utils/auth";
-import { db } from "~/server/db";
+import { getServerSession, authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "~/server/db";
 
 interface CreateArticleRequest {
   url: string;
@@ -17,16 +17,25 @@ interface ArticleResponse {
   date: string;
 }
 
+interface SavedArticle {
+  id: string;
+  url: string;
+  title: string;
+  excerpt: string | null;
+  date: Date;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("GET articles session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const articles = await db.savedArticle.findMany({
-      where: { userId: currentUser.id },
+    const articles = await prisma.savedArticle.findMany({
+      where: { userId: session.user.id },
       orderBy: { date: "desc" },
       select: {
         id: true,
@@ -37,7 +46,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const formattedArticles: ArticleResponse[] = articles.map((article) => ({
+    const formattedArticles: ArticleResponse[] = articles.map((article: SavedArticle) => ({
       id: article.id,
       url: article.url,
       title: article.title,
@@ -57,9 +66,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("POST article session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -73,9 +83,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingArticle = await db.savedArticle.findFirst({
+    const existingArticle = await prisma.savedArticle.findFirst({
       where: {
-        userId: currentUser.id,
+        userId: session.user.id,
         url,
       },
     });
@@ -87,12 +97,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const article = await db.savedArticle.create({
+    const article = await prisma.savedArticle.create({
       data: {
         url,
         title,
         excerpt,
-        userId: currentUser.id,
+        userId: session.user.id,
       },
     });
 

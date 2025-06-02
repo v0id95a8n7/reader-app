@@ -5,27 +5,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { SmallLoader } from "~/components/LoadingSpinner";
-import { useAuth } from "~/utils/use-auth";
+import { signIn, useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const { login, error, isLoading, user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const redirect = searchParams.get("redirect");
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+
+  console.log("Login page - session status:", status, "session:", session);
 
   // If user is already logged in, redirect to home page
   useEffect(() => {
-    console.log("Login page: checking auth state", { user, isLoading });
-    if (user && !isLoading) {
+    if (session?.user && status === "authenticated") {
       console.log("User already logged in, redirecting to home");
       const redirectTo = redirect ? decodeURIComponent(redirect) : "/";
-      window.location.href = redirectTo;
+      router.push(redirectTo);
     }
-  }, [user, isLoading, redirect]);
+  }, [session, status, redirect, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,23 +37,22 @@ export default function LoginPage() {
     setLocalError(null);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
+      console.log("Calling signIn...");
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
+      console.log("SignIn result:", result);
 
-      if (response.ok) {
+      if (result?.error) {
+        console.error("Login error from result:", result.error);
+        setLocalError(result.error);
+      } else {
         console.log("Login successful, redirecting...");
         // Redirect to specified page or home page
         const redirectTo = redirect ? decodeURIComponent(redirect) : "/";
-        window.location.href = redirectTo;
-      } else {
-        const data = await response.json();
-        setLocalError(data.error ?? "An error occurred during login");
+        router.push(redirectTo);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -131,12 +132,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {(localError ?? error) && (
+          {localError && (
             <div
               className="relative rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700"
               role="alert"
             >
-              <span className="block sm:inline">{localError ?? error}</span>
+              <span className="block sm:inline">{localError}</span>
             </div>
           )}
 

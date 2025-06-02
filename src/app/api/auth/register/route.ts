@@ -1,66 +1,65 @@
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { hashPassword, createToken, setAuthCookie } from "~/utils/auth";
-import { db } from "~/server/db";
+import { prisma } from "~/server/db";
+import { hashPassword } from "~/utils/auth";
 
-interface RegisterRequest {
-  email: string;
-  password: string;
-  name?: string;
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as RegisterRequest;
-    const { email, password, name } = body;
+    const { email, password, name } = await request.json();
+    console.log("Registration attempt:", { email, name, passwordProvided: !!password });
 
+    // Validate input
     if (!email || !password) {
+      console.log("Registration failed: missing email or password");
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 },
       );
     }
 
-    const existingUser = await db.user.findUnique({
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
+      console.log("Registration failed: user already exists");
       return NextResponse.json(
-        { error: "Email already exists" },
+        { error: "User with this email already exists" },
         { status: 400 },
       );
     }
 
+    // Hash password
+    console.log("Hashing password...");
     const hashedPassword = await hashPassword(password);
+    console.log("Password hashed successfully");
 
-    const user = await db.user.create({
+    // Create user
+    console.log("Creating user in database...");
+    const user = await prisma.user.create({
       data: {
         email,
+        name,
         password: hashedPassword,
-        name: name ?? email.split("@")[0],
       },
     });
+    console.log("User created successfully:", user.id);
 
-    const token = await createToken({
-      id: user.id,
-      email: user.email,
-      ...(user.name ? { name: user.name } : {}),
-    });
-
-    const response = NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
+    // Return user without password
+    return NextResponse.json(
+      {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
       },
-    });
-
-    return setAuthCookie(response, token);
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
+      { error: "An error occurred during registration" },
       { status: 500 },
     );
   }

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "~/utils/auth";
-import { db } from "~/server/db";
+import { getServerSession } from "../auth/[...nextauth]/route";
+import { prisma } from "~/server/db";
 
 interface SettingsRequest {
   fontSize?: number;
@@ -13,14 +13,15 @@ interface SettingsRequest {
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("Settings GET - session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const settings = await db.userSettings.findUnique({
-      where: { userId: currentUser.id },
+    const settings = await prisma.userSettings.findUnique({
+      where: { userId: session.user.id },
     });
 
     if (!settings) {
@@ -47,9 +48,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("Settings POST - session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -87,8 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Update or create settings
-    const settings = await db.userSettings.upsert({
-      where: { userId: currentUser.id },
+    const settings = await prisma.userSettings.upsert({
+      where: { userId: session.user.id },
       update: {
         fontSize: body.fontSize,
         fontFamily: body.fontFamily,
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
         showVideos: body.showVideos,
       },
       create: {
-        userId: currentUser.id,
+        userId: session.user.id,
         fontSize: body.fontSize ?? 18,
         fontFamily: body.fontFamily ?? "PT Serif",
         lineHeight: body.lineHeight ?? 1.6,

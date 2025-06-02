@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "./use-auth";
+import { useSession } from "next-auth/react";
 
 export interface Article {
   id: string;
@@ -30,10 +30,14 @@ export function useSavedArticles(): UseSavedArticles {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { data: session, status } = useSession();
+  const user = session?.user;
 
   const fetchArticles = useCallback(async () => {
+    console.log("Fetching articles, session status:", status, "user:", user);
+    
     if (!user) {
+      console.log("No user in session, clearing articles");
       setArticles([]);
       setIsLoading(false);
       return;
@@ -65,7 +69,7 @@ export function useSavedArticles(): UseSavedArticles {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, status]);
 
   useEffect(() => {
     void fetchArticles();

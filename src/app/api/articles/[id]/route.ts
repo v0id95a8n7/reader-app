@@ -1,21 +1,22 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "~/utils/auth";
-import { db } from "~/server/db";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession, authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "~/server/db";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
 
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
+    console.log("DELETE article session:", session);
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const article = await db.savedArticle.findUnique({
+    const article = await prisma.savedArticle.findUnique({
       where: { id },
     });
 
@@ -23,14 +24,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
     }
 
-    if (article.userId !== currentUser.id) {
+    if (article.userId !== session.user.id) {
       return NextResponse.json(
         { error: "You do not have permission to delete this article" },
         { status: 403 },
       );
     }
 
-    await db.savedArticle.delete({
+    await prisma.savedArticle.delete({
       where: { id },
     });
 

@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "~/components/Sidebar";
-import { useAuth } from "~/utils/use-auth";
 import { useSavedArticles } from "~/utils/use-saved-articles";
 import { PageLoader } from "~/components/LoadingSpinner";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { useSession, signOut } from "next-auth/react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,19 +16,21 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoading: isAuthLoading, logout } = useAuth();
+  const { data: session, status } = useSession();
+  const isAuthLoading = status === "loading";
+  const user = session?.user;
   const { articles, isLoading, deleteArticle } = useSavedArticles();
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    if (!isAuthLoading) {
-      if (!user && pathname !== "/login" && pathname !== "/register") {
+    if (status !== "loading") {
+      if (!session && pathname !== "/login" && pathname !== "/register") {
         void router.replace("/login");
-      } else if (user && (pathname === "/login" || pathname === "/register")) {
+      } else if (session && (pathname === "/login" || pathname === "/register")) {
         void router.replace("/");
       }
     }
-  }, [user, isAuthLoading, pathname, router]);
+  }, [session, status, pathname, router]);
 
   if (isAuthLoading) {
     return <PageLoader />;
@@ -68,8 +70,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     return;
   };
 
-  const handleLogout = () => {
-    void logout();
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
     void router.push("/login");
   };
 
@@ -109,8 +111,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             onArticleClick={handleArticleClick}
             onDeleteArticle={handleDeleteArticle}
             onAddArticle={handleSaveArticle}
-            currentUser={user?.name ?? user?.email}
-            onLogout={logout}
+            currentUser={(user?.name || user?.email) ?? ""}
+            onLogout={handleLogout}
             isLoading={isLoading}
             _onLogoClick={handleLogoClick}
           />
