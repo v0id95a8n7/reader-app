@@ -8,9 +8,5 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return (
-    <TRPCReactProvider>
-      {children}
-    </TRPCReactProvider>
-  );
-} 
+  return <TRPCReactProvider>{children}</TRPCReactProvider>;
+}

@@ -1,9 +1,9 @@
-import { jwtVerify, SignJWT } from 'jose';
-import { cookies } from 'next/headers';
-import { type NextRequest, type NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import { jwtVerify, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { type NextRequest, type NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET ?? "your-secret-key";
 
 const SALT_ROUNDS = 10;
 
@@ -24,7 +24,10 @@ export async function hashPassword(password: string): Promise<string> {
 /**
  * Compare password with hash
  */
-export async function comparePasswords(password: string, hash: string): Promise<boolean> {
+export async function comparePasswords(
+  password: string,
+  hash: string,
+): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
@@ -33,11 +36,11 @@ export async function comparePasswords(password: string, hash: string): Promise<
  */
 export async function createToken(payload: JWTPayload): Promise<string> {
   const secret = new TextEncoder().encode(JWT_SECRET);
-  
+
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime("7d")
     .sign(secret);
 }
 
@@ -60,27 +63,30 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
  */
 export async function setTokenCookie(token: string): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set('auth_token', token, {
+  cookieStore.set("auth_token", token, {
     httpOnly: true,
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    sameSite: 'lax',
+    sameSite: "lax",
   });
 }
 
 /**
  * Set JWT token in cookie for NextResponse
  */
-export function setAuthCookie(response: NextResponse, token: string): NextResponse {
+export function setAuthCookie(
+  response: NextResponse,
+  token: string,
+): NextResponse {
   response.cookies.set({
-    name: 'auth_token',
+    name: "auth_token",
     value: token,
     httpOnly: true,
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    sameSite: 'lax',
+    sameSite: "lax",
   });
   return response;
 }
@@ -90,7 +96,7 @@ export function setAuthCookie(response: NextResponse, token: string): NextRespon
  */
 export async function getTokenFromCookies(): Promise<string | undefined> {
   const cookieStore = await cookies();
-  const cookieValue = cookieStore.get('auth_token');
+  const cookieValue = cookieStore.get("auth_token");
   return cookieValue?.value;
 }
 
@@ -99,24 +105,26 @@ export async function getTokenFromCookies(): Promise<string | undefined> {
  */
 export async function removeTokenCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete('auth_token');
+  cookieStore.delete("auth_token");
 }
 
 /**
  * Get current user from request
  */
-export async function getCurrentUser(req?: NextRequest): Promise<JWTPayload | null> {
+export async function getCurrentUser(
+  req?: NextRequest,
+): Promise<JWTPayload | null> {
   let token: string | undefined;
-  
+
   if (req) {
-    token = req.cookies.get('auth_token')?.value;
+    token = req.cookies.get("auth_token")?.value;
   } else {
     token = await getTokenFromCookies();
   }
-  
+
   if (!token) {
     return null;
   }
-  
+
   return verifyToken(token);
-} 
+}

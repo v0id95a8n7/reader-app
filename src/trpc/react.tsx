@@ -1,12 +1,12 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createTRPCReact } from '@trpc/react-query';
-import { httpBatchLink } from '@trpc/client';
-import { useState } from 'react';
-import { type AppRouter } from '~/server/api/root';
-import { getUrl, transformer } from './shared';
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createTRPCReact } from "@trpc/react-query";
+import { httpBatchLink } from "@trpc/client";
+import { useState } from "react";
+import { type AppRouter } from "~/server/api/root";
+import { getUrl, transformer } from "./shared";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 export const api = createTRPCReact<AppRouter>();
 
@@ -47,7 +47,7 @@ export function TRPCReactProvider(props: {
           url: getUrl(),
           headers() {
             const headers = new Map(props.headers);
-            headers.set('x-trpc-source', 'react');
+            headers.set("x-trpc-source", "react");
             return Object.fromEntries(headers);
           },
         }),

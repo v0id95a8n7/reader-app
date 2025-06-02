@@ -16,4 +16,4 @@ export function FontProvider({ ptSerifFont, ptSansFont }: FontProviderProps) {
       }
     `}</style>
   );
-} 
+}

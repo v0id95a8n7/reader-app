@@ -2,14 +2,14 @@ import { type Config } from "tailwindcss";
 
 export default {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       width: {
-        '120': '30rem', // 480px (1.5 * 20rem/320px)
+        "120": "30rem", // 480px (1.5 * 20rem/320px)
       },
       colors: {
         border: "hsl(var(--border))",
@@ -55,14 +55,14 @@ export default {
         "pt-serif": ["var(--font-pt-serif)", "serif"],
         "pt-sans": ["var(--font-pt-sans)", "sans-serif"],
         "pt-mono": ["var(--font-pt-mono)", "monospace"],
-        nunito: ['Nunito', 'sans-serif'],
+        nunito: ["Nunito", "sans-serif"],
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },
   plugins: [],
-} satisfies Config; 
+} satisfies Config;

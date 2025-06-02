@@ -100,31 +100,6 @@ npm run build
 npm run start
 ```
 
-## Project Structure
-
-```
-reader-app/
-├── prisma/                  # Database schema and migrations
-├── public/                  # Static assets
-├── src/
-│   ├── app/                 # Next.js App Router
-│   │   ├── api/             # API routes
-│   │   ├── article/         # Article page
-│   │   ├── login/           # Login page
-│   │   └── register/        # Registration page
-│   ├── components/          # React components
-│   ├── server/              # Server-side code
-│   │   └── api/             # tRPC API routers
-│   ├── styles/              # Global styles
-│   ├── trpc/               # tRPC client setup
-│   └── utils/              # Utility functions and hooks
-├── .env.example            # Example environment variables
-├── next.config.js          # Next.js configuration
-├── package.json            # Project dependencies
-├── tailwind.config.ts      # Tailwind CSS configuration
-└── tsconfig.json           # TypeScript configuration
-```
-
 ## How It Works
 
 1. **User Authentication**: The app uses JWT tokens stored in HTTP-only cookies for secure authentication.
@@ -133,19 +108,6 @@ reader-app/
 4. **User Settings**: Reading preferences (font size, family, etc.) are persisted to both localStorage and the server.
 5. **Rendering**: The content is rendered with custom React components that prioritize readability and accessibility.
 
-## Deployment
-
-The application can be deployed to any hosting platform that supports Node.js:
-
-- [Vercel](https://vercel.com/) (recommended for Next.js)
-- [Netlify](https://www.netlify.com/)
-- [Railway](https://railway.app/)
-- Traditional VPS with Nginx
-
-For production deployment, ensure you set the following environment variables:
-- `DATABASE_URL`: Connection string to your production database
-- `JWT_SECRET`: A secure random string for JWT signing
-- `NODE_ENV=production`: To enable production optimizations
 
 ## Contributing
 

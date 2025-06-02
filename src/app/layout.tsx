@@ -40,15 +40,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${nunito.variable} ${ptSerif.variable} ${ptSans.variable} font-nunito`}>
+      <body
+        className={`${nunito.variable} ${ptSerif.variable} ${ptSans.variable} font-nunito`}
+      >
         <FontProvider
           ptSerifFont={ptSerif.style.fontFamily}
           ptSansFont={ptSans.style.fontFamily}
         />
         <Providers>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <AppLayout>{children}</AppLayout>
         </Providers>
       </body>
     </html>

@@ -8,18 +8,18 @@ import "./src/env.js";
 const config = {
   // Конфигурация для улучшения производительности
   reactStrictMode: true,
-  
+
   // Конфигурация для оптимизации изображений
   images: {
-    domains: ['*'],
+    domains: ["*"],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
-  
+
   // Конфигурация для обработки Node.js модулей в браузере
   webpack: (config, { isServer }) => {
     // Только для клиентской сборки
@@ -40,7 +40,7 @@ const config = {
         path: false,
       };
     }
-    
+
     return config;
   },
 };

@@ -105,7 +105,7 @@ const fetchSettings = async (): Promise<ReaderSettings | null> => {
   try {
     const response = await fetch("/api/settings");
     if (response.ok) {
-      const data = await response.json() as ReaderSettings;
+      const data = (await response.json()) as ReaderSettings;
       return data;
     }
   } catch (error) {

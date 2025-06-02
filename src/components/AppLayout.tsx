@@ -6,8 +6,8 @@ import { Sidebar } from "~/components/Sidebar";
 import { useAuth } from "~/utils/use-auth";
 import { useSavedArticles } from "~/utils/use-saved-articles";
 import { PageLoader } from "~/components/LoadingSpinner";
-import { BookOpenIcon } from '@heroicons/react/24/outline';
-import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -56,7 +56,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     try {
       await deleteArticle(id);
     } catch (error) {
-      console.error('Failed to delete article:', error);
+      console.error("Failed to delete article:", error);
     }
   };
 
@@ -74,29 +74,34 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   return (
-    <div className="font-nunito flex flex-col min-h-screen bg-gray-50">
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-20 flex items-center px-6">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={handleLogoClick}>
-          <div className="bg-white p-2 rounded-md shadow-sm">
+    <div className="font-nunito flex min-h-screen flex-col bg-gray-50">
+      <header className="fixed top-0 right-0 left-0 z-20 flex h-16 items-center border-b border-gray-100 bg-white px-6 shadow-sm">
+        <div
+          className="flex cursor-pointer items-center space-x-3"
+          onClick={handleLogoClick}
+        >
+          <div className="rounded-md bg-white p-2 shadow-sm">
             <BookOpenIcon className="h-6 w-6 text-gray-500" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-700 font-nunito">Reader</h1>
+          <h1 className="font-nunito text-xl font-semibold text-gray-700">
+            Reader
+          </h1>
         </div>
-        
+
         <div className="ml-auto">
           {user && (
             <button
               onClick={handleLogout}
-              className="px-4 py-2 rounded-md hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+              className="flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 hover:bg-gray-100"
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
-              <span className="hidden sm:inline text-gray-600">Sign out</span>
+              <span className="hidden text-gray-600 sm:inline">Sign out</span>
             </button>
           )}
         </div>
       </header>
 
-      <div className="flex pt-16 h-screen">
+      <div className="flex h-screen pt-16">
         <div className="w-120 flex-shrink-0">
           <Sidebar
             articles={articles}
@@ -111,7 +116,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           />
         </div>
 
-        <main className="flex-1 overflow-y-auto p-6 h-[calc(100vh-4rem)]">
+        <main className="h-[calc(100vh-4rem)] flex-1 overflow-y-auto p-6">
           <div className="mx-auto max-w-4xl">
             {isPending ? (
               <div className="flex h-full items-center justify-center">

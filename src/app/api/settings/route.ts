@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '~/utils/auth';
-import { db } from '~/server/db';
+import { type NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "~/utils/auth";
+import { db } from "~/server/db";
 
 interface SettingsRequest {
   fontSize?: number;
@@ -14,36 +14,33 @@ interface SettingsRequest {
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser(request);
-    
+
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const settings = await db.userSettings.findUnique({
       where: { userId: currentUser.id },
     });
-    
+
     if (!settings) {
       // Return default settings if not found
       return NextResponse.json({
         fontSize: 18,
-        fontFamily: 'PT Serif',
+        fontFamily: "PT Serif",
         lineHeight: 1.6,
-        textAlign: 'left',
+        textAlign: "left",
         showImages: true,
-        showVideos: true
+        showVideos: true,
       });
     }
-    
+
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Get settings error:', error);
+    console.error("Get settings error:", error);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
+      { error: "An unexpected error occurred" },
+      { status: 500 },
     );
   }
 }
@@ -51,47 +48,44 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser(request);
-    
+
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    const body = await request.json() as SettingsRequest;
-    
+
+    const body = (await request.json()) as SettingsRequest;
+
     // Validate settings
     if (body.fontSize && (body.fontSize < 10 || body.fontSize > 30)) {
       return NextResponse.json(
-        { error: 'Font size must be between 10 and 30' },
-        { status: 400 }
+        { error: "Font size must be between 10 and 30" },
+        { status: 400 },
       );
     }
-    
+
     if (body.lineHeight && (body.lineHeight < 1.0 || body.lineHeight > 3.0)) {
       return NextResponse.json(
-        { error: 'Line height must be between 1.0 and 3.0' },
-        { status: 400 }
+        { error: "Line height must be between 1.0 and 3.0" },
+        { status: 400 },
       );
     }
-    
-    const validFontFamilies = ['PT Serif', 'PT Sans'];
+
+    const validFontFamilies = ["PT Serif", "PT Sans"];
     if (body.fontFamily && !validFontFamilies.includes(body.fontFamily)) {
       return NextResponse.json(
-        { error: 'Invalid font family' },
-        { status: 400 }
+        { error: "Invalid font family" },
+        { status: 400 },
       );
     }
-    
-    const validTextAligns = ['left', 'center', 'right', 'justify'];
+
+    const validTextAligns = ["left", "center", "right", "justify"];
     if (body.textAlign && !validTextAligns.includes(body.textAlign)) {
       return NextResponse.json(
-        { error: 'Invalid text alignment' },
-        { status: 400 }
+        { error: "Invalid text alignment" },
+        { status: 400 },
       );
     }
-    
+
     // Update or create settings
     const settings = await db.userSettings.upsert({
       where: { userId: currentUser.id },
@@ -106,20 +100,20 @@ export async function POST(request: NextRequest) {
       create: {
         userId: currentUser.id,
         fontSize: body.fontSize ?? 18,
-        fontFamily: body.fontFamily ?? 'PT Serif',
+        fontFamily: body.fontFamily ?? "PT Serif",
         lineHeight: body.lineHeight ?? 1.6,
-        textAlign: body.textAlign ?? 'left',
+        textAlign: body.textAlign ?? "left",
         showImages: body.showImages ?? true,
         showVideos: body.showVideos ?? true,
       },
     });
-    
+
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Save settings error:', error);
+    console.error("Save settings error:", error);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
+      { error: "An unexpected error occurred" },
+      { status: 500 },
     );
   }
-} 
+}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { CogIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from "react";
+import { CogIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface Settings {
   fontSize: number;
@@ -21,39 +21,39 @@ export function FloatingSettingsButton({
 }: FloatingSettingsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
-  
+
   const toggleSettings = () => {
     setIsOpen(!isOpen);
   };
-  
+
   const handleFontSizeChange = (value: number) => {
     onSettingsChange({
       ...settings,
       fontSize: value,
     });
   };
-  
+
   const handleFontFamilyChange = (value: string) => {
     onSettingsChange({
       ...settings,
       fontFamily: value,
     });
   };
-  
+
   const handleLineHeightChange = (value: number) => {
     onSettingsChange({
       ...settings,
       lineHeight: value,
     });
   };
-  
+
   const handleTextAlignChange = (isJustified: boolean) => {
     onSettingsChange({
       ...settings,
-      textAlign: isJustified ? 'justify' : 'left',
+      textAlign: isJustified ? "justify" : "left",
     });
   };
-  
+
   const handleShowImagesChange = (value: boolean) => {
     onSettingsChange({
       ...settings,
@@ -61,41 +61,45 @@ export function FloatingSettingsButton({
     });
   };
 
-  
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+      if (
+        settingsRef.current &&
+        !settingsRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed right-6 bottom-6 z-50">
       {isOpen ? (
-        <div 
+        <div
           ref={settingsRef}
-          className="bg-white shadow-md p-6 w-80 transform transition-all duration-300 ease-in-out font-nunito border border-gray-200 rounded-lg"
+          className="font-nunito w-80 transform rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-all duration-300 ease-in-out"
         >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-700 font-nunito">Reader Settings</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-nunito text-lg font-bold text-gray-700">
+              Reader Settings
+            </h3>
             <button
               onClick={toggleSettings}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full cursor-pointer"
+              className="cursor-pointer rounded-full p-1 text-gray-400 transition-colors hover:text-gray-600"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
-          
+
           <div className="space-y-4">
             {/* Font Size */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1 font-nunito">
+              <label className="font-nunito mb-1 block text-sm font-medium text-gray-600">
                 Font Size: {settings.fontSize}px
               </label>
               <input
@@ -105,28 +109,28 @@ export function FloatingSettingsButton({
                 step="1"
                 value={settings.fontSize}
                 onChange={(e) => handleFontSizeChange(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 appearance-none cursor-pointer accent-gray-500 rounded"
+                className="h-2 w-full cursor-pointer appearance-none rounded bg-gray-200 accent-gray-500"
               />
             </div>
-            
+
             {/* Font Family */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1 font-nunito">
+              <label className="font-nunito mb-1 block text-sm font-medium text-gray-600">
                 Font Family
               </label>
               <select
                 value={settings.fontFamily}
                 onChange={(e) => handleFontFamilyChange(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-200 text-gray-600 focus:outline-none font-nunito focus:border-gray-400 focus:ring-1 focus:ring-gray-300 rounded-md cursor-pointer"
+                className="font-nunito w-full cursor-pointer rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-600 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 focus:outline-none"
               >
                 <option value="PT Serif">PT Serif</option>
                 <option value="PT Sans">PT Sans</option>
               </select>
             </div>
-            
+
             {/* Line Height */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1 font-nunito">
+              <label className="font-nunito mb-1 block text-sm font-medium text-gray-600">
                 Line Height: {settings.lineHeight}
               </label>
               <input
@@ -136,55 +140,58 @@ export function FloatingSettingsButton({
                 step="0.1"
                 value={settings.lineHeight}
                 onChange={(e) => handleLineHeightChange(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 appearance-none cursor-pointer accent-gray-500 rounded"
+                className="h-2 w-full cursor-pointer appearance-none rounded bg-gray-200 accent-gray-500"
               />
             </div>
-            
+
             {/* Text Align */}
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-600 font-nunito">
+              <label className="font-nunito text-sm font-medium text-gray-600">
                 Justify Text
               </label>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"
-                  checked={settings.textAlign === 'justify'}
+                  checked={settings.textAlign === "justify"}
                   onChange={(e) => handleTextAlignChange(e.target.checked)}
-                  className="sr-only peer"
+                  className="peer sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-500"></div>
+                <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-gray-500 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
-            
+
             {/* Show Images */}
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-600 font-nunito">
+              <label className="font-nunito text-sm font-medium text-gray-600">
                 Show Images
               </label>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"
                   checked={settings.showImages}
                   onChange={(e) => handleShowImagesChange(e.target.checked)}
-                  className="sr-only peer"
+                  className="peer sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-500"></div>
+                <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-gray-500 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
-            
+
             {/* Show Videos */}
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-600 font-nunito">
-                Show Videos <span className="text-xs text-gray-400 font-nunito">(coming soon)</span>
+              <label className="font-nunito text-sm font-medium text-gray-600">
+                Show Videos{" "}
+                <span className="font-nunito text-xs text-gray-400">
+                  (coming soon)
+                </span>
               </label>
-              <label className="relative inline-flex items-center cursor-not-allowed">
+              <label className="relative inline-flex cursor-not-allowed items-center">
                 <input
                   type="checkbox"
                   checked={settings.showVideos}
                   disabled
-                  className="sr-only peer"
+                  className="peer sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-200 opacity-50 peer-focus:outline-none peer rounded-full peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-500"></div>
+                <div className="peer h-6 w-11 rounded-full bg-gray-200 opacity-50 peer-checked:bg-gray-500 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
           </div>
@@ -192,7 +199,7 @@ export function FloatingSettingsButton({
       ) : (
         <button
           onClick={toggleSettings}
-          className="bg-white text-gray-500 p-3 shadow-md hover:bg-gray-100 transition-all duration-200 border border-gray-200 rounded-full cursor-pointer"
+          className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-200 hover:bg-gray-100"
           aria-label="Open reader settings"
         >
           <CogIcon className="h-6 w-6" />
@@ -200,4 +207,4 @@ export function FloatingSettingsButton({
       )}
     </div>
   );
-} 
+}
