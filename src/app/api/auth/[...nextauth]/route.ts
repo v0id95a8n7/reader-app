@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import NextAuth from "next-auth";
-import { authOptions } from "../../../../lib/auth";
+import { authOptions } from "./options";
 
-// В NextAuth v4 типы для App Router еще не полностью поддерживаются
-// Поэтому используем прямой экспорт функций из NextAuth
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const { GET, POST } = NextAuth(authOptions);
+// Create a handler using NextAuth
+const handler = NextAuth(authOptions);
+
+// Export the handler functions
+export { handler as GET, handler as POST };
