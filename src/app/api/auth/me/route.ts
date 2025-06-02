@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { db } from "~/server/db";
-import { getCurrentUser } from "~/utils/auth";
+import { prisma } from "~/server/db";
+import { getServerSession } from "~/utils/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser(request);
+    const session = await getServerSession();
 
-    if (!currentUser) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: currentUser.id },
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
       select: {
         id: true,
         email: true,

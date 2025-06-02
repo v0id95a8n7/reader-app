@@ -1,8 +1,8 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { decodeHtmlEntities } from "~/utils/html-entities";
 import type { Article } from "~/utils/use-saved-articles";
-import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, ArrowPathIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 interface SidebarProps {
   articles: Article[];
@@ -16,15 +16,38 @@ interface SidebarProps {
   _onLogoClick: () => void;
 }
 
-const AddArticleInput = memo(function AddArticleInput({
-  onSubmit,
-  isLoading,
-}: {
-  onSubmit: (url: string) => void;
-  isLoading: boolean;
+const SidebarHeader = memo(function SidebarHeader({ 
+  onAddUrl
+}: { 
+  onAddUrl: (url: string) => Promise<void> 
 }) {
+  const [isAddPopoverOpen, setIsAddPopoverOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        popoverRef.current &&
+        buttonRef.current &&
+        !popoverRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsAddPopoverOpen(false);
+      }
+    }
+
+    if (isAddPopoverOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isAddPopoverOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,35 +63,128 @@ const AddArticleInput = memo(function AddArticleInput({
     }
 
     setError(null);
-    onSubmit(url);
-    setUrl("");
+    setIsSubmitting(true);
+    
+    onAddUrl(url)
+      .catch((error) => {
+        console.error("Failed to add URL:", error);
+        // Error is already handled in the onAddUrl function
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+        setUrl("");
+        setIsAddPopoverOpen(false);
+      });
   };
 
   return (
-    <div className="border-b border-gray-100 p-4">
-      <form onSubmit={handleSubmit} className="relative">
-        <div className="flex items-center">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter article URL"
-            className="font-nunito w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-16 text-gray-700 transition-all duration-200 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
-          />
-          <div className="absolute right-0">
-            <button
-              type="submit"
-              className="font-nunito cursor-pointer px-3 py-2 font-medium text-gray-500 hover:text-gray-700"
-              disabled={isLoading}
-            >
-              {isLoading ? <ArrowPathIcon className="h-5 w-5 animate-spin text-gray-500" /> : "Add"}
-            </button>
+    <div className="h-12 flex gap-2 items-center pl-4 pr-2 relative">
+      <div className="font-nunito text-xl font-medium text-gray-600 flex-1">Saved articles</div>
+      <div className="relative">
+        <button 
+          ref={buttonRef}
+          onClick={() => setIsAddPopoverOpen(!isAddPopoverOpen)}
+          className="font-nunito text-sm text-gray-500 hover:text-gray-700 cursor-pointer rounded-md px-2 py-2 hover:bg-gray-100"
+          aria-expanded={isAddPopoverOpen}
+          aria-controls="add-article-popover"
+        >
+          <PlusIcon className="h-5 w-5" />
+        </button>
+
+        {isAddPopoverOpen && (
+          <div 
+            id="add-article-popover"
+            ref={popoverRef}
+            role="dialog"
+            aria-modal="true"
+            className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-md z-50"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-nunito text-base font-medium text-gray-700">
+                Add new article
+              </h3>
+              <button
+                onClick={() => setIsAddPopoverOpen(false)}
+                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="article-url" className="font-nunito mb-1 block text-sm font-medium text-gray-600">
+                  Article URL
+                </label>
+                <input
+                  id="article-url"
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com/article"
+                  className="font-nunito w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+                />
+                {error && (
+                  <p className="font-nunito mt-1 text-xs text-red-500">{error}</p>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddPopoverOpen(false)}
+                  className="font-nunito rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="font-nunito rounded-md border border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-300 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-1">
+                      <ArrowPathIcon className="h-3 w-3 animate-spin" />
+                      Adding...
+                    </span>
+                  ) : (
+                    "Add Article"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        </div>
-        {error && (
-          <p className="font-nunito mt-1 text-xs text-red-500">{error}</p>
         )}
-      </form>
+      </div>
+    </div>
+  );
+});
+
+const SearchInput = memo(function SearchInput({
+  searchTerm,
+  onSearchChange,
+}: {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+}) {
+  return (
+    <div className="relative">
+      <MagnifyingGlassIcon className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-400" />
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder="Search..."
+        className="font-nunito h-12 w-full border-t border-b border-gray-200 bg-white px-10 py-2 text-gray-700 transition-all duration-200 outline-none"
+      />
+      {searchTerm && (
+        <button
+          onClick={() => onSearchChange("")}
+          className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+        >
+          <XMarkIcon className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 });
@@ -87,7 +203,7 @@ const ArticleItem = memo(
   }) => {
     return (
       <li
-        className={`group mx-2 my-2 cursor-pointer rounded-md border border-gray-100 px-3 py-3 transition-all duration-200 ${isActive ? "border-gray-200 bg-gray-100" : "hover:bg-gray-50"}`}
+        className={`group mx-2 my-2 cursor-pointer rounded-md px-3 py-3 transition-all duration-200 ${isActive ? "bg-gray-100" : "hover:bg-gray-50"}`}
         onClick={onClick}
       >
         <h3
@@ -110,7 +226,7 @@ const ArticleItem = memo(
           </span>
           <button
             onClick={onDelete}
-            className="cursor-pointer rounded p-1 text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-red-500"
+            className="cursor-pointer rounded p-1 text-gray-400 opacity-0 transition-all duration-400 ease-in-out group-hover:opacity-50 hover:text-red-500 hover:opacity-100"
             aria-label="Delete article"
           >
             <TrashIcon className="h-4 w-4" />
@@ -136,7 +252,7 @@ export const Sidebar = memo(function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [activeArticleUrl, setActiveArticleUrl] = useState<string | null>(null);
-  const [isSubmittingUrl, setIsSubmittingUrl] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (pathname?.includes("/article/")) {
@@ -155,9 +271,7 @@ export const Sidebar = memo(function Sidebar({
     }
   }, [pathname]);
 
-  const handleUrlSubmit = async (url: string) => {
-    setIsSubmittingUrl(true);
-
+  const handleUrlSubmit = async (url: string): Promise<void> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -217,16 +331,22 @@ export const Sidebar = memo(function Sidebar({
             : "An unexpected error occurred",
         );
       }
-
-      setIsSubmittingUrl(false);
+      throw error; // Re-throw to let the caller know the operation failed
     }
   };
 
+  // Filter articles based on search term
+  const filteredArticles = searchTerm
+    ? articles.filter(article => 
+        article.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : articles;
+
   return (
     <div className="font-nunito fixed top-16 left-0 z-10 flex h-[calc(100vh-4rem)] w-120 flex-col border-r border-gray-100 bg-white text-gray-600 shadow-sm">
-      {/* URL Input Field */}
-      <AddArticleInput onSubmit={handleUrlSubmit} isLoading={isSubmittingUrl} />
-
+      <SidebarHeader onAddUrl={handleUrlSubmit} />
+      {/* Search Input Field */}
+      <SearchInput searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       {/* Articles List with isolated scrolling */}
       <div className="scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent flex-1 overflow-y-auto px-2 py-2">
         {isLoading ? (
@@ -237,13 +357,13 @@ export const Sidebar = memo(function Sidebar({
           <>
             {/* Articles List with isolated scrolling */}
             <ul className="overflow-auto">
-              {articles.length === 0 ? (
+              {filteredArticles.length === 0 ? (
                 /* Empty state when no articles are available */
-                <div className="font-nunito m-2 rounded-md bg-gray-50 p-6 text-center text-sm text-gray-400 shadow-inner">
-                  No saved articles
+                <div className="font-nunito m-2 p-6 text-center text-sm text-gray-400">
+                  {searchTerm ? "No articles match your search :(" : "No saved articles :("}
                 </div>
               ) : (
-                articles.map((article) => (
+                filteredArticles.map((article) => (
                   <ArticleItem
                     key={article.id}
                     article={article}
@@ -261,8 +381,8 @@ export const Sidebar = memo(function Sidebar({
         )}
 
         {/* Empty state when no article is selected */}
-        {!activeArticleUrl && articles.length > 0 && pathname === "/" && (
-          <div className="font-nunito mx-2 mt-4 rounded-md bg-gray-50 p-4 text-center text-xs text-gray-400 italic shadow-inner">
+        {!activeArticleUrl && filteredArticles.length > 0 && pathname === "/" && (
+          <div className="font-nunito mx-2 mt-4 p-4 text-center text-xs text-gray-400 italic border-t border-gray-100">
             Select an article from the list or add a new one
           </div>
         )}

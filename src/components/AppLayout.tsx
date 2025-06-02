@@ -83,14 +83,15 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="font-nunito flex min-h-screen flex-col bg-gray-50">
-      <header className="fixed top-0 right-0 left-0 z-20 flex h-16 items-center border-b border-gray-100 bg-white px-6 shadow-sm">
+      <header className="fixed top-0 right-0 left-0 z-20 flex h-16 items-center border-b border-gray-200 bg-white px-6">
         <div
           className="flex cursor-pointer items-center space-x-3"
           onClick={handleLogoClick}
         >
-          <h1 className="flex flex-row gap-1 justify-center items-center font-nunito text-xl font-semibold text-gray-700">
+          <h1 className="font-nunito flex flex-row items-center justify-center gap-1 text-xl font-semibold text-gray-700">
             <NewspaperIcon className="h-6 w-6 text-gray-700" />
             Reader
+            <span className="text-xs text-gray-400">(pre-alpha)</span>
           </h1>
         </div>
 
@@ -98,7 +99,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {user && (
             <button
               onClick={handleLogout}
-              className="flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 hover:bg-gray-100"
+              className="flex flex-row items-center gap-2 font-nunito rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
             >
               <span className="hidden text-gray-600 sm:inline">Sign out</span>
               <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
@@ -115,7 +116,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             onArticleClick={handleArticleClick}
             onDeleteArticle={handleDeleteArticle}
             onAddArticle={handleSaveArticle}
-            _currentUser={(user?.name ?? user?.email) ?? ""}
+            _currentUser={user?.name ?? user?.email ?? ""}
             _onLogout={handleLogout}
             isLoading={isLoading}
             _onLogoClick={handleLogoClick}
