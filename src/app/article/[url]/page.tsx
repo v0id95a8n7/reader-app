@@ -101,6 +101,31 @@ function extractPublishedTime(html: string): string | null {
 
 const articleCache = new Map<string, ArticleContent>();
 
+const fetchSettings = async (): Promise<ReaderSettings | null> => {
+  try {
+    const response = await fetch("/api/settings");
+    if (response.ok) {
+      const data = await response.json() as ReaderSettings;
+      return data;
+    }
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+  }
+  return null;
+};
+
+const getLocalSettings = (): ReaderSettings | null => {
+  const savedSettings = localStorage.getItem("readerSettings");
+  if (savedSettings) {
+    try {
+      return JSON.parse(savedSettings) as ReaderSettings;
+    } catch (e) {
+      console.error("Error parsing reader settings:", e);
+    }
+  }
+  return null;
+};
+
 export default function ArticlePage() {
   const [article, setArticle] = useState<ArticleContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -354,17 +379,17 @@ export default function ArticlePage() {
 
   const handleLinkClick = (url: string) => {
     if (url.startsWith("#")) {
-      // Внутренняя ссылка - перемещаемся к элементу
+      // Internal link - scroll to element
       const elementId = url.substring(1);
       const element = document.getElementById(elementId);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
     } else if (url.startsWith("http")) {
-      // Внешняя ссылка - открываем в новом окне
+      // External link - open in new window
       window.open(url, "_blank", "noopener,noreferrer");
     } else {
-      // Относительная ссылка - пока ничего не делаем
+      // Relative link - do nothing for now
       console.log("Relative link clicked:", url);
     }
   };

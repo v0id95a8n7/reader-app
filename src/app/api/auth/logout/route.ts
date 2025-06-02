@@ -5,11 +5,11 @@ export async function POST(_request: NextRequest) {
   try {
     const response = NextResponse.json({ success: true });
     
-    // Удаление куки аутентификации через установку пустого значения и срока действия в прошлом
+    // Remove authentication cookie by setting empty value and expiration in the past
     response.cookies.set({
       name: 'auth_token',
       value: '',
-      expires: new Date(0), // Срок в прошлом - 1970-01-01
+      expires: new Date(0), // Date in the past - 1970-01-01
       path: '/',
       httpOnly: true,
       sameSite: 'lax',

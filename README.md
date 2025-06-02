@@ -2,34 +2,42 @@
 
 A clean, distraction-free article reading application that lets you save and read articles from the web with a beautiful, customizable reading experience.
 
+![Reader App Screenshot](public/screenshot.png)
+
 ## Features
 
-- Save articles from across the web
-- Clean, distraction-free reading experience
-- Responsive design for all devices
-- User authentication system with JWT tokens
-- Article parsing using Mozilla's Readability
-- Customizable reading preferences
-- Article management (save, delete)
-- Auto-fetch article details from URLs
+- **Clean Reading Experience**: Distraction-free interface for comfortable reading
+- **Article Parsing**: Save articles from any website using Mozilla's Readability engine
+- **User Accounts**: Secure authentication system to access your article library
+- **Customizable Settings**: Adjust font size, font family, line height, and text alignment
+- **Responsive Design**: Optimized for all devices - desktop, tablet, and mobile
+- **Image & Video Control**: Toggle visibility of images and videos within articles
+- **Keyboard Navigation**: Navigate between articles with keyboard shortcuts
+- **Dark Mode Support**: Read comfortably in any lighting condition
+- **Link Handling**: Smart handling of internal and external links
+- **Article Management**: Save, organize, and delete articles in your library
 
 ## Tech Stack
 
-- **Framework**: Next.js 15
-- **Language**: TypeScript
-- **Database**: SQLite with Prisma ORM
-- **Authentication**: Custom JWT-based auth with jose
-- **Styling**: Tailwind CSS
-- **API**: tRPC for type-safe APIs
-- **Content Parsing**: Mozilla Readability
-- **DOM Sanitization**: DOMPurify
+- **Framework**: [Next.js 15](https://nextjs.org/) - React framework with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- **Database**: SQLite with [Prisma ORM](https://www.prisma.io/)
+- **Authentication**: Custom JWT-based auth with [jose](https://github.com/panva/jose)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- **API**: [tRPC](https://trpc.io/) - End-to-end typesafe APIs
+- **Content Parsing**: [Mozilla Readability](https://github.com/mozilla/readability) - Article extraction
+- **DOM Sanitization**: [DOMPurify](https://github.com/cure53/DOMPurify) - XSS protection
+- **State Management**: React Context and Hooks
+- **UI Components**: Custom components with [Heroicons](https://heroicons.com/)
+- **Fonts**: Google Fonts (Nunito, PT Serif, PT Sans)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18+ (LTS recommended)
 - SQLite database
+- npm or yarn package manager
 
 ### Installation
 
@@ -49,7 +57,11 @@ A clean, distraction-free article reading application that lets you save and rea
    cp .env.example .env.local
    ```
    
-4. Update the `.env.local` file with your database URL and JWT secret.
+4. Update the `.env.local` file with your database URL and JWT secret:
+   ```
+   DATABASE_URL="file:./dev.db"
+   JWT_SECRET="your-secure-jwt-secret"
+   ```
 
 5. Set up the database:
    ```bash
@@ -88,36 +100,66 @@ npm run build
 npm run start
 ```
 
-## Production Deployment
-
-1. Build the application:
-   ```bash
-   npm run build
-   ```
-
-2. Start the production server:
-   ```bash
-   npm run start
-   ```
-
 ## Project Structure
 
-- `/src/app` - Next.js app router files
-- `/src/components` - Reusable React components
-- `/src/utils` - Utility functions
-- `/src/server` - Server-side code and API routes
-- `/prisma` - Database schema and migrations
+```
+reader-app/
+├── prisma/                  # Database schema and migrations
+├── public/                  # Static assets
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── api/             # API routes
+│   │   ├── article/         # Article page
+│   │   ├── login/           # Login page
+│   │   └── register/        # Registration page
+│   ├── components/          # React components
+│   ├── server/              # Server-side code
+│   │   └── api/             # tRPC API routers
+│   ├── styles/              # Global styles
+│   ├── trpc/               # tRPC client setup
+│   └── utils/              # Utility functions and hooks
+├── .env.example            # Example environment variables
+├── next.config.js          # Next.js configuration
+├── package.json            # Project dependencies
+├── tailwind.config.ts      # Tailwind CSS configuration
+└── tsconfig.json           # TypeScript configuration
+```
 
 ## How It Works
 
-1. **User Authentication**: Register and login to access your saved articles.
-2. **Article Parsing**: Enter any URL, and the app will extract the main content using Mozilla's Readability.
-3. **Saving Articles**: Articles are saved to your profile and accessible anytime.
-4. **Reading Experience**: Enjoy a clean, customizable reading experience.
+1. **User Authentication**: The app uses JWT tokens stored in HTTP-only cookies for secure authentication.
+2. **Article Parsing**: When a user adds a new article URL, the server fetches the content, processes it with Mozilla's Readability, and sanitizes HTML with DOMPurify.
+3. **Data Storage**: Articles are stored in a SQLite database through Prisma ORM, associated with the user's account.
+4. **User Settings**: Reading preferences (font size, family, etc.) are persisted to both localStorage and the server.
+5. **Rendering**: The content is rendered with custom React components that prioritize readability and accessibility.
+
+## Deployment
+
+The application can be deployed to any hosting platform that supports Node.js:
+
+- [Vercel](https://vercel.com/) (recommended for Next.js)
+- [Netlify](https://www.netlify.com/)
+- [Railway](https://railway.app/)
+- Traditional VPS with Nginx
+
+For production deployment, ensure you set the following environment variables:
+- `DATABASE_URL`: Connection string to your production database
+- `JWT_SECRET`: A secure random string for JWT signing
+- `NODE_ENV=production`: To enable production optimizations
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 

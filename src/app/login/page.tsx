@@ -17,7 +17,7 @@ export default function LoginPage() {
   const router = useRouter();
   const redirect = searchParams.get('redirect');
 
-  // Если пользователь уже вошел, перенаправить на главную страницу
+  // If user is already logged in, redirect to home page
   useEffect(() => {
     console.log('Login page: checking auth state', { user, isLoading });
     if (user && !isLoading) {
@@ -46,12 +46,12 @@ export default function LoginPage() {
       
       if (response.ok) {
         console.log('Login successful, redirecting...');
-        // Перенаправление на указанную страницу или главную
+        // Redirect to specified page or home page
         const redirectTo = redirect ? decodeURIComponent(redirect) : '/';
         window.location.href = redirectTo;
       } else {
         const data = await response.json();
-        setLocalError(data.error || 'An error occurred during login');
+        setLocalError(data.error ?? 'An error occurred during login');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -122,9 +122,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {(localError || error) && (
+          {(localError ?? error) && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md relative" role="alert">
-              <span className="block sm:inline">{localError || error}</span>
+              <span className="block sm:inline">{localError ?? error}</span>
             </div>
           )}
 

@@ -2,7 +2,7 @@ import "~/styles/globals.css";
 import "@fontsource/nunito";
 
 import { type Metadata } from "next";
-import { Nunito, PT_Serif, PT_Sans, PT_Mono } from "next/font/google";
+import { Nunito, PT_Serif, PT_Sans } from "next/font/google";
 import { Providers } from "../components/providers";
 import { FontProvider } from "../components/font-provider";
 import { AppLayout } from "../components/AppLayout";
@@ -27,13 +27,6 @@ const ptSans = PT_Sans({
   variable: "--font-pt-sans",
 });
 
-const ptMono = PT_Mono({
-  weight: ["400"],
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-  variable: "--font-pt-mono",
-});
-
 export const metadata: Metadata = {
   title: "Reader App",
   description: "Clean reading experience for web articles",
@@ -47,7 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${nunito.variable} ${ptSerif.variable} ${ptSans.variable} ${ptMono.variable} font-nunito`}>
+      <body className={`${nunito.variable} ${ptSerif.variable} ${ptSans.variable} font-nunito`}>
         <FontProvider
           ptSerifFont={ptSerif.style.fontFamily}
           ptSansFont={ptSans.style.fontFamily}

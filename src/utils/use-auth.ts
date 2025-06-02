@@ -79,7 +79,7 @@ export function useAuth(): UseAuth {
   const navigateTo = (path: string) => {
     console.log('Navigating to:', path);
     
-    // Программное перенаправление с помощью window.location
+    // Programmatic redirection using window.location
     window.location.href = path;
   };
 
@@ -107,9 +107,9 @@ export function useAuth(): UseAuth {
           error: null,
         });
         
-        console.log('Login successful, redirecting to', redirect || '/');
+        console.log('Login successful, redirecting to', redirect ?? '/');
         
-        // Перенаправление на запрошенную страницу или домашнюю страницу
+        // Redirect to requested page or home page
         if (redirect) {
           const decodedRedirect = decodeURIComponent(redirect);
           navigateTo(decodedRedirect);

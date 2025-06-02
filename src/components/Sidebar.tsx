@@ -4,6 +4,10 @@ import { SmallLoader } from './LoadingSpinner';
 import { usePathname } from 'next/navigation';
 import { decodeHtmlEntities } from '~/utils/html-entities';
 import type { Article } from '~/utils/use-saved-articles';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSavedArticles } from "~/utils/use-saved-articles";
+import { ArticleSearchInput } from "./ArticleSearchInput";
 
 interface SidebarProps {
   articles: Article[];
