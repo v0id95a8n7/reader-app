@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "~/server/db";
 import { hashPassword } from "~/utils/auth";
 
+interface RegisterRequest {
+  email: string;
+  password: string;
+  name?: string;
+}
+
 export async function POST(request: Request) {
   try {
-    const { email, password, name } = await request.json();
+    const body = await request.json() as RegisterRequest;
+    const { email, password, name } = body;
     console.log("Registration attempt:", { email, name, passwordProvided: !!password });
 
     // Validate input

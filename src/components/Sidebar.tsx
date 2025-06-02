@@ -1,18 +1,8 @@
 import React, { useState, useEffect, memo } from "react";
-import {
-  PlusIcon,
-  UserIcon,
-  XMarkIcon,
-  ArrowRightIcon,
-} from "@heroicons/react/24/outline";
 import { SmallLoader } from "./LoadingSpinner";
 import { usePathname } from "next/navigation";
 import { decodeHtmlEntities } from "~/utils/html-entities";
 import type { Article } from "~/utils/use-saved-articles";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useSavedArticles } from "~/utils/use-saved-articles";
-import { ArticleSearchInput } from "./ArticleSearchInput";
 
 interface SidebarProps {
   articles: Article[];
@@ -20,8 +10,8 @@ interface SidebarProps {
   onArticleClick: (url: string) => void;
   onDeleteArticle: (id: string) => void;
   onAddArticle: () => void;
-  currentUser?: string;
-  onLogout: () => void;
+  _currentUser?: string;
+  _onLogout: () => void;
   isLoading: boolean;
   _onLogoClick: () => void;
 }
@@ -139,8 +129,8 @@ export const Sidebar = memo(function Sidebar({
   onArticleClick,
   onDeleteArticle,
   onAddArticle,
-  currentUser,
-  onLogout,
+  _currentUser,
+  _onLogout,
   isLoading,
   _onLogoClick,
 }: SidebarProps) {

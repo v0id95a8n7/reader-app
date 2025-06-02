@@ -7,6 +7,15 @@ import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { SmallLoader } from "~/components/LoadingSpinner";
 import { signIn, useSession } from "next-auth/react";
 
+interface RegisterResponse {
+  user?: {
+    id: string;
+    email: string;
+    name?: string;
+  };
+  error?: string;
+}
+
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +49,7 @@ export default function RegisterPage() {
         body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as RegisterResponse;
       console.log("Registration response:", response.status, data);
 
       if (response.ok) {

@@ -1,4 +1,4 @@
-import { type NextAuthOptions } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "~/server/db";
 import { comparePasswords } from "~/utils/auth";
@@ -78,5 +78,5 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   debug: true,
-  secret: "your-secret-key-here",
+  secret: process.env.NEXTAUTH_SECRET,
 }; 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -41,7 +40,6 @@ export function useAuth(): UseAuth {
     isLoading: true,
     error: null,
   });
-  const router = useRouter();
 
   useEffect(() => {
     const fetchCurrentUser = async () => {

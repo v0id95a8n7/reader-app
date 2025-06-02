@@ -111,8 +111,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             onArticleClick={handleArticleClick}
             onDeleteArticle={handleDeleteArticle}
             onAddArticle={handleSaveArticle}
-            currentUser={(user?.name || user?.email) ?? ""}
-            onLogout={handleLogout}
+            _currentUser={(user?.name ?? user?.email) ?? ""}
+            _onLogout={handleLogout}
             isLoading={isLoading}
             _onLogoClick={handleLogoClick}
           />

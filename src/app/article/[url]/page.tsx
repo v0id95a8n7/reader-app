@@ -7,14 +7,12 @@ import { Readability } from "@mozilla/readability";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  HomeIcon,
 } from "@heroicons/react/24/outline";
 import { ContentLoader } from "~/components/LoadingSpinner";
 import {
   ArticleRenderer,
   type ArticleRendererProps,
 } from "~/components/ArticleRenderer";
-import { FloatingSettingsButton } from "~/components/FloatingSettingsButton";
 import { ArticleHeader } from "~/components/ArticleHeader";
 import { FloatingButtons } from "~/components/FloatingButtons";
 
@@ -101,31 +99,6 @@ function extractPublishedTime(html: string): string | null {
 
 const articleCache = new Map<string, ArticleContent>();
 
-const fetchSettings = async (): Promise<ReaderSettings | null> => {
-  try {
-    const response = await fetch("/api/settings");
-    if (response.ok) {
-      const data = (await response.json()) as ReaderSettings;
-      return data;
-    }
-  } catch (error) {
-    console.error("Error fetching settings:", error);
-  }
-  return null;
-};
-
-const getLocalSettings = (): ReaderSettings | null => {
-  const savedSettings = localStorage.getItem("readerSettings");
-  if (savedSettings) {
-    try {
-      return JSON.parse(savedSettings) as ReaderSettings;
-    } catch (e) {
-      console.error("Error parsing reader settings:", e);
-    }
-  }
-  return null;
-};
-
 export default function ArticlePage() {
   const [article, setArticle] = useState<ArticleContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -144,11 +117,11 @@ export default function ArticlePage() {
   const articleContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchSettingsData = async () => {
       try {
         const response = await fetch("/api/settings");
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as ReaderSettings;
           setSettings(data);
           setIsSettingsSaved(true);
         } else {
@@ -174,7 +147,7 @@ export default function ArticlePage() {
       }
     };
 
-    void fetchSettings();
+    void fetchSettingsData();
   }, []);
 
   useEffect(() => {
