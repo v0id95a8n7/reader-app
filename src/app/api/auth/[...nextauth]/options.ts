@@ -78,5 +78,5 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   debug: true,
-  secret: "your-secret-key-here",
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.JWT_SECRET,
 }; 
