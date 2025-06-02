@@ -1,12 +1,12 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Nunito, PT_Serif, PT_Sans } from "next/font/google";
+import { PT_Serif, PT_Sans, Nunito_Sans } from "next/font/google";
 import { Providers } from "../components/providers";
 import { FontProvider } from "../components/font-provider";
 import { AppLayout } from "../components/AppLayout";
 
-const nunito = Nunito({
+const nunito = Nunito_Sans({
   subsets: ["latin", "cyrillic"],
   display: "swap",
   variable: "--font-nunito",

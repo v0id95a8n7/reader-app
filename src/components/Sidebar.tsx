@@ -110,7 +110,7 @@ const ArticleItem = memo(
             </span>
             <button
               onClick={onDelete}
-              className="cursor-pointer rounded px-2 py-1 text-xs text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-gray-600"
+              className="cursor-pointer rounded px-2 py-1 text-xs text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-red-500"
             >
               Delete
             </button>

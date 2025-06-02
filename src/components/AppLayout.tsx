@@ -82,10 +82,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           className="flex cursor-pointer items-center space-x-3"
           onClick={handleLogoClick}
         >
-          <div className="rounded-md bg-white p-2 shadow-sm">
-            <BookOpenIcon className="h-6 w-6 text-gray-500" />
-          </div>
-          <h1 className="font-nunito text-xl font-semibold text-gray-700">
+          {/* <div className="rounded-md bg-white p-2 shadow-sm"> */}
+          {/* </div> */}
+          <h1 className="flex flex-row gap-1 justify-center items-center font-nunito text-xl font-semibold text-gray-700">
+            <BookOpenIcon className="h-6 w-6 text-gray-700" />
             Reader
           </h1>
         </div>

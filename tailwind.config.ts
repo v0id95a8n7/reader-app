@@ -55,7 +55,7 @@ export default {
         "pt-serif": ["var(--font-pt-serif)", "serif"],
         "pt-sans": ["var(--font-pt-sans)", "sans-serif"],
         "pt-mono": ["var(--font-pt-mono)", "monospace"],
-        nunito: ["Nunito", "sans-serif"],
+        nunito: ["var(--font-nunito)", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
