@@ -78,13 +78,15 @@ export function FloatingButtons({
   
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-3">
-      <button
-        onClick={onScrollToTop}
-        className="bg-white text-gray-500 p-3 shadow-md hover:bg-gray-100 transition-all duration-200 border border-gray-200 rounded-full cursor-pointer"
-        aria-label="Scroll to top"
-      >
-        <ArrowUpIcon className="h-6 w-6" />
-      </button>
+      {!isOpen && (
+        <button
+          onClick={onScrollToTop}
+          className="bg-white text-gray-500 p-3 shadow-md hover:bg-gray-100 transition-all duration-200 border border-gray-200 rounded-full cursor-pointer"
+          aria-label="Scroll to top"
+        >
+          <ArrowUpIcon className="h-6 w-6" />
+        </button>
+      )}
       
       {isOpen ? (
         <div 
@@ -130,7 +132,6 @@ export function FloatingButtons({
               >
                 <option value="PT Serif">PT Serif</option>
                 <option value="PT Sans">PT Sans</option>
-                <option value="PT Mono">PT Mono</option>
               </select>
             </div>
             
@@ -190,7 +191,7 @@ export function FloatingButtons({
               <label className="relative inline-flex items-center cursor-not-allowed">
                 <input
                   type="checkbox"
-                  checked={settings.showVideos}
+                  checked={false}
                   disabled
                   className="sr-only peer"
                 />

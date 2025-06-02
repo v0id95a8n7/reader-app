@@ -38,8 +38,6 @@ export function ArticleRenderer({ content, settings, originalUrl: _originalUrl, 
         return 'font-pt-serif';
       case 'PT Sans':
         return 'font-pt-sans';
-      case 'PT Mono':
-        return 'font-pt-mono';
       default:
         return 'font-pt-serif';
     }

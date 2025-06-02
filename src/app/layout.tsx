@@ -51,7 +51,6 @@ export default function RootLayout({
         <FontProvider
           ptSerifFont={ptSerif.style.fontFamily}
           ptSansFont={ptSans.style.fontFamily}
-          ptMonoFont={ptMono.style.fontFamily}
         />
         <Providers>
           <AppLayout>

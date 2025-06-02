@@ -2,7 +2,6 @@ import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { type NextRequest, type NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { type CookieOptions } from 'next/dist/server/web/spec-extension/cookies';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'your-secret-key';
 
@@ -56,21 +55,18 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 }
 
 /**
- * Set JWT token in cookie - используется на сервере
- * Эта функция оставлена для обратной совместимости, но лучше использовать setAuthCookie
+ * Set JWT token in cookie - used on server
+ * This function is kept for backward compatibility, but it's better to use setAuthCookie
  */
-export function setTokenCookie(token: string): void {
-  const cookieOptions: CookieOptions = {
-    name: 'auth_token',
-    value: token,
+export async function setTokenCookie(token: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set('auth_token', token, {
     httpOnly: true,
     path: '/',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     sameSite: 'lax',
-  };
-  
-  void cookies().set(cookieOptions);
+  });
 }
 
 /**
@@ -92,8 +88,8 @@ export function setAuthCookie(response: NextResponse, token: string): NextRespon
 /**
  * Get JWT token from cookie
  */
-export function getTokenFromCookies(): string | undefined {
-  const cookieStore = cookies();
+export async function getTokenFromCookies(): Promise<string | undefined> {
+  const cookieStore = await cookies();
   const cookieValue = cookieStore.get('auth_token');
   return cookieValue?.value;
 }
@@ -101,8 +97,9 @@ export function getTokenFromCookies(): string | undefined {
 /**
  * Remove JWT token from cookie
  */
-export function removeTokenCookie(): void {
-  void cookies().delete('auth_token');
+export async function removeTokenCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete('auth_token');
 }
 
 /**
@@ -114,7 +111,7 @@ export async function getCurrentUser(req?: NextRequest): Promise<JWTPayload | nu
   if (req) {
     token = req.cookies.get('auth_token')?.value;
   } else {
-    token = getTokenFromCookies();
+    token = await getTokenFromCookies();
   }
   
   if (!token) {

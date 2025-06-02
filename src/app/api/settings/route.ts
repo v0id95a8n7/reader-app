@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const validFontFamilies = ['PT Serif', 'PT Sans', 'PT Mono'];
+    const validFontFamilies = ['PT Serif', 'PT Sans'];
     if (body.fontFamily && !validFontFamilies.includes(body.fontFamily)) {
       return NextResponse.json(
         { error: 'Invalid font family' },

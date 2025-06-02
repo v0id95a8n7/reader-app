@@ -19,11 +19,9 @@ interface SidebarProps {
 
 
 const AddArticleInput = memo(function AddArticleInput({
-  onCancel,
   onSubmit,
   isLoading,
 }: {
-  onCancel: () => void;
   onSubmit: (url: string) => void;
   isLoading: boolean;
 }) {
@@ -45,6 +43,7 @@ const AddArticleInput = memo(function AddArticleInput({
     
     setError(null);
     onSubmit(url);
+    setUrl('');
   };
 
   return (
@@ -55,25 +54,16 @@ const AddArticleInput = memo(function AddArticleInput({
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com/article"
+            placeholder="Enter article URL"
             className="w-full px-3 py-2 pr-16 border border-gray-300 outline-none transition-all duration-200 shadow-sm bg-white text-gray-700 font-nunito focus:border-gray-400 focus:ring-1 focus:ring-gray-300 rounded-md"
-            autoFocus
           />
-          <div className="absolute right-0 flex">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="p-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-              disabled={isLoading}
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+          <div className="absolute right-0">
             <button
               type="submit"
-              className="p-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+              className="px-3 py-2 text-gray-500 hover:text-gray-700 cursor-pointer font-nunito font-medium"
               disabled={isLoading}
             >
-              {isLoading ? <SmallLoader /> : <ArrowRightIcon className="h-5 w-5" />}
+              {isLoading ? <SmallLoader /> : "Add"}
             </button>
           </div>
         </div>
@@ -146,7 +136,6 @@ export const Sidebar = memo(function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [activeArticleUrl, setActiveArticleUrl] = useState<string | null>(null);
-  const [isAddingArticle, setIsAddingArticle] = useState(false);
   const [isSubmittingUrl, setIsSubmittingUrl] = useState(false);
   
   
@@ -167,10 +156,6 @@ export const Sidebar = memo(function Sidebar({
       setActiveArticleUrl(null);
     }
   }, [pathname]);
-
-  const handleAddButtonClick = () => {
-    setIsAddingArticle(true);
-  };
 
   const handleUrlSubmit = async (url: string) => {
     setIsSubmittingUrl(true);
@@ -213,9 +198,6 @@ export const Sidebar = memo(function Sidebar({
       }
       
       
-      setIsAddingArticle(false);
-      
-      
       onAddArticle();
       
       
@@ -239,24 +221,11 @@ export const Sidebar = memo(function Sidebar({
 
   return (
     <div className="fixed top-16 left-0 w-120 h-[calc(100vh-4rem)] flex flex-col bg-white border-r border-gray-100 text-gray-600 shadow-sm z-10 font-nunito">
-      {/* Add Article Button or Input */}
-      {isAddingArticle ? (
-        <AddArticleInput 
-          onCancel={() => setIsAddingArticle(false)}
-          onSubmit={handleUrlSubmit}
-          isLoading={isSubmittingUrl}
-        />
-      ) : (
-        <div className="p-4 border-b border-gray-100">
-          <button
-            onClick={handleAddButtonClick}
-            className="w-full flex items-center justify-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 transition-all duration-200 shadow-sm rounded-md cursor-pointer"
-          >
-            <PlusIcon className="h-5 w-5" />
-            <span className="font-nunito">Add Article</span>
-          </button>
-        </div>
-      )}
+      {/* URL Input Field */}
+      <AddArticleInput 
+        onSubmit={handleUrlSubmit}
+        isLoading={isSubmittingUrl}
+      />
 
       {/* Articles List with isolated scrolling */}
       <div className="flex-1 overflow-y-auto px-2 py-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">

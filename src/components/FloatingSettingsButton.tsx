@@ -121,7 +121,6 @@ export function FloatingSettingsButton({
               >
                 <option value="PT Serif">PT Serif</option>
                 <option value="PT Sans">PT Sans</option>
-                <option value="PT Mono">PT Mono</option>
               </select>
             </div>
             
