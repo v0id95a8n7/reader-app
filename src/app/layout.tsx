@@ -1,5 +1,4 @@
 import "~/styles/globals.css";
-import "@fontsource/nunito";
 
 import { type Metadata } from "next";
 import { Nunito, PT_Serif, PT_Sans } from "next/font/google";
