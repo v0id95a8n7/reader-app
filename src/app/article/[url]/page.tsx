@@ -438,28 +438,6 @@ export default function ArticlePage() {
       ) : article ? (
         <>
           <div className="relative">
-            <div className="mb-6 flex items-center">
-              {prevArticle && (
-                <button
-                  onClick={() => navigateToArticle(prevArticle.url)}
-                  className="mr-auto rounded-full p-2 transition-colors hover:bg-gray-100"
-                  aria-label="Previous article"
-                >
-                  <ChevronLeftIcon className="h-5 w-5 text-gray-500" />
-                </button>
-              )}
-
-              {nextArticle && (
-                <button
-                  onClick={() => navigateToArticle(nextArticle.url)}
-                  className="ml-auto rounded-full p-2 transition-colors hover:bg-gray-100"
-                  aria-label="Next article"
-                >
-                  <ChevronRightIcon className="h-5 w-5 text-gray-500" />
-                </button>
-              )}
-            </div>
-
             <ArticleHeader
               title={article.title}
               byline={article.byline}
