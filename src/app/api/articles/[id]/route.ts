@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession, authOptions } from "../../auth/[...nextauth]/route";
+import { getServerSession } from "~/utils/auth";
 import { prisma } from "~/server/db";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const session = await getServerSession();
     console.log("DELETE article session:", session);

@@ -11,7 +11,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
-      <TRPCReactProvider>{children}</TRPCReactProvider>
+      <TRPCReactProvider headers={new Headers()}>{children}</TRPCReactProvider>
     </SessionProvider>
   );
 }

@@ -41,10 +41,10 @@ export function TRPCReactProvider(props: {
 
   const [trpcClient] = useState(() =>
     api.createClient({
-      transformer,
       links: [
         httpBatchLink({
           url: getUrl(),
+          transformer,
           headers() {
             const headers = new Map(props.headers);
             headers.set("x-trpc-source", "react");

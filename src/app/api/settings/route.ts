@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "../auth/[...nextauth]/route";
+import { getServerSession } from "~/utils/auth";
 import { prisma } from "~/server/db";
 
 interface SettingsRequest {

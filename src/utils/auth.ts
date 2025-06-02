@@ -2,6 +2,8 @@ import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { type NextRequest, type NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { getServerSession as getNextAuthServerSession } from "next-auth";
+import { authOptions } from "../app/api/auth/[...nextauth]/options";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "your-secret-key";
 
@@ -13,6 +15,13 @@ interface JWTPayload {
   email: string;
   [key: string]: unknown;
 }
+
+/**
+ * Get server session from NextAuth
+ */
+export const getServerSession = async () => {
+  return getNextAuthServerSession(authOptions);
+};
 
 /**
  * Hash a password

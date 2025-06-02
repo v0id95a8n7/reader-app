@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "../auth/[...nextauth]/route";
+import { getServerSession } from "~/utils/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -375,7 +375,7 @@ function extractExcerpt(html: string): string | undefined {
 
   const paragraphMatch = /<p[^>]*>([^<]+)<\/p>/i.exec(html);
 
-  if (paragraphMatch?.length > 1) {
+  if (paragraphMatch && paragraphMatch.length > 1 && paragraphMatch[1]) {
     const text = decodeHtmlEntities(paragraphMatch[1].trim());
     return text.length > 150 ? `${text.substring(0, 147)}...` : text;
   }

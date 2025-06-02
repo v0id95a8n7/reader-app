@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getServerSession, authOptions } from "../auth/[...nextauth]/route";
+import { getServerSession } from "~/utils/auth";
 import { prisma } from "~/server/db";
 
 interface CreateArticleRequest {
