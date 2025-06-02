@@ -106,6 +106,7 @@ export default function ArticlePage() {
   const [isPending, startTransition] = useTransition();
   const [settings, setSettings] = useState<ReaderSettings>(DEFAULT_SETTINGS);
   const [isSettingsSaved, setIsSettingsSaved] = useState(false);
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
 
   const router = useRouter();
   const params = useParams();
@@ -144,6 +145,8 @@ export default function ArticlePage() {
             console.error("Error parsing reader settings:", e);
           }
         }
+      } finally {
+        setIsSettingsLoaded(true);
       }
     };
 
@@ -374,7 +377,7 @@ export default function ArticlePage() {
   const nextArticle =
     currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
 
-  if (isLoading || isPending) {
+  if (isLoading || isPending || !isSettingsLoaded) {
     return <ContentLoader />;
   }
 
@@ -419,7 +422,7 @@ export default function ArticlePage() {
 
   return (
     <div className="max-w-full" ref={articleContentRef}>
-      {isLoading ? (
+      {isLoading || !isSettingsLoaded ? (
         <ContentLoader />
       ) : error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-800">
