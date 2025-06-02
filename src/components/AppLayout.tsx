@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "~/components/Sidebar";
 import { useSavedArticles } from "~/utils/use-saved-articles";
-import { PageLoader } from "~/components/LoadingSpinner";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { NewspaperIcon, ArrowRightOnRectangleIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useSession, signOut } from "next-auth/react";
 
 interface AppLayoutProps {
@@ -33,7 +31,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, [session, status, pathname, router]);
 
   if (isAuthLoading) {
-    return <PageLoader />;
+    return (
+      <div className="font-nunito flex min-h-screen items-center justify-center bg-gray-50">
+        <ArrowPathIcon className="h-24 w-24 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
   if (pathname === "/login" || pathname === "/register") {
@@ -41,7 +43,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   if (!user) {
-    return <PageLoader />;
+    return (
+      <div className="font-nunito flex min-h-screen items-center justify-center bg-gray-50">
+        <ArrowPathIcon className="h-24 w-24 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
   const handleArticleClick = (url: string) => {
@@ -82,10 +88,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           className="flex cursor-pointer items-center space-x-3"
           onClick={handleLogoClick}
         >
-          {/* <div className="rounded-md bg-white p-2 shadow-sm"> */}
-          {/* </div> */}
           <h1 className="flex flex-row gap-1 justify-center items-center font-nunito text-xl font-semibold text-gray-700">
-            <BookOpenIcon className="h-6 w-6 text-gray-700" />
+            <NewspaperIcon className="h-6 w-6 text-gray-700" />
             Reader
           </h1>
         </div>
@@ -96,8 +100,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               onClick={handleLogout}
               className="flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 hover:bg-gray-100"
             >
-              <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
               <span className="hidden text-gray-600 sm:inline">Sign out</span>
+              <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
             </button>
           )}
         </div>

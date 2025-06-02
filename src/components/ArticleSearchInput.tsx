@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 interface ArticleSearchInputProps {
   onSearch: (query: string) => void;

@@ -7,8 +7,8 @@ import { Readability } from "@mozilla/readability";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import { ContentLoader } from "~/components/LoadingSpinner";
+  ArrowPathIcon
+} from "@heroicons/react/24/solid";
 import {
   ArticleRenderer,
   type ArticleRendererProps,
@@ -378,7 +378,11 @@ export default function ArticlePage() {
     currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
 
   if (isLoading || isPending || !isSettingsLoaded) {
-    return <ContentLoader />;
+    return (
+      <div className="font-nunito flex min-h-[60vh] items-center justify-center">
+        <ArrowPathIcon className="h-16 w-16 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
   if (error) {
@@ -423,7 +427,9 @@ export default function ArticlePage() {
   return (
     <div className="max-w-full" ref={articleContentRef}>
       {isLoading || !isSettingsLoaded ? (
-        <ContentLoader />
+        <div className="font-nunito flex min-h-[60vh] items-center justify-center">
+          <ArrowPathIcon className="h-16 w-16 animate-spin text-gray-500" />
+        </div>
       ) : error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-800">
           <h2 className="mb-2 text-lg font-bold">Error Loading Article</h2>

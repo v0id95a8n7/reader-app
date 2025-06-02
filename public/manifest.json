@@ -1,0 +1,16 @@
+{
+  "name": "Reader App",
+  "short_name": "Reader",
+  "description": "Clean reading experience for web articles",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6B7280",
+  "icons": [
+    {
+      "src": "/newspaper-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+} 

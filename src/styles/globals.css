@@ -89,7 +89,7 @@ body {
   color: hsl(var(--foreground));
 }
 
-/* Styles for loading animation */
+/* Animation styles */
 .animate-spin {
   animation: spin 1s linear infinite;
 }

@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { SmallLoader } from "~/components/LoadingSpinner";
+import { NewspaperIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import { signIn, useSession } from "next-auth/react";
 
 interface RegisterResponse {
@@ -90,9 +89,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="flex justify-center">
-            <div className="rounded-md bg-white p-3 shadow-sm">
-              <BookOpenIcon className="h-12 w-12 text-gray-500" />
-            </div>
+            <NewspaperIcon className="h-12 w-12 text-gray-700" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-700">
             Create your account
@@ -188,7 +185,7 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 className="flex w-full cursor-pointer justify-center rounded-md border border-transparent bg-gray-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
               >
-                {isLoading ? <SmallLoader /> : "Create account"}
+                {isLoading ? <ArrowPathIcon className="h-5 w-5 animate-spin text-white" /> : "Create account"}
               </button>
             </div>
           </form>

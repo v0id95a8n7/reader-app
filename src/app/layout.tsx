@@ -29,7 +29,10 @@ const ptSans = PT_Sans({
 export const metadata: Metadata = {
   title: "Reader App",
   description: "Clean reading experience for web articles",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  manifest: "/manifest.json",
+  icons: [
+    { rel: "icon", url: "/newspaper-icon.svg", type: "image/svg+xml" },
+  ],
 };
 
 export default function RootLayout({
@@ -39,6 +42,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body
         className={`${nunito.variable} ${ptSerif.variable} ${ptSans.variable} font-nunito`}
       >

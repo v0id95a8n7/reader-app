@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { CogIcon, XMarkIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { AdjustmentsHorizontalIcon, XMarkIcon, ArrowUpIcon } from "@heroicons/react/24/solid";
 
 interface Settings {
   fontSize: number;
@@ -214,7 +214,7 @@ export function FloatingButtons({
           className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-200 hover:bg-gray-100"
           aria-label="Open reader settings"
         >
-          <CogIcon className="h-6 w-6" />
+          <AdjustmentsHorizontalIcon className="h-6 w-6" />
         </button>
       )}
     </div>

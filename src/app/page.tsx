@@ -1,15 +1,13 @@
 "use client";
 
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { NewspaperIcon } from "@heroicons/react/24/solid";
 
 export default function HomePage() {
   return (
     <div className="flex min-h-[calc(100vh-16rem)] flex-col items-center justify-center">
       <div className="font-nunito max-w-md text-center">
         <div className="mb-8 flex justify-center">
-          <div className="rounded-full bg-gray-400 p-4 shadow-sm">
-            <BookOpenIcon className="h-20 w-20 text-white" />
-          </div>
+          <NewspaperIcon className="h-20 w-20 text-gray-700" />
         </div>
         <h1 className="font-nunito mb-6 text-4xl font-bold text-gray-700">
           Welcome to Reader

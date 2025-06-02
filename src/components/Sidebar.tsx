@@ -1,8 +1,8 @@
 import React, { useState, useEffect, memo } from "react";
-import { SmallLoader } from "./LoadingSpinner";
 import { usePathname } from "next/navigation";
 import { decodeHtmlEntities } from "~/utils/html-entities";
 import type { Article } from "~/utils/use-saved-articles";
+import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 
 interface SidebarProps {
   articles: Article[];
@@ -53,7 +53,7 @@ const AddArticleInput = memo(function AddArticleInput({
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter article URL"
-            className="font-nunito w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-16 text-gray-700 shadow-sm transition-all duration-200 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
+            className="font-nunito w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-16 text-gray-700 transition-all duration-200 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
           />
           <div className="absolute right-0">
             <button
@@ -61,7 +61,7 @@ const AddArticleInput = memo(function AddArticleInput({
               className="font-nunito cursor-pointer px-3 py-2 font-medium text-gray-500 hover:text-gray-700"
               disabled={isLoading}
             >
-              {isLoading ? <SmallLoader /> : "Add"}
+              {isLoading ? <ArrowPathIcon className="h-5 w-5 animate-spin text-gray-500" /> : "Add"}
             </button>
           </div>
         </div>
@@ -87,34 +87,34 @@ const ArticleItem = memo(
   }) => {
     return (
       <li
-        className={`group mx-2 my-2 rounded-md border-gray-100 px-3 py-3 transition-all duration-200 ${isActive ? "border-l-4 border-l-gray-400 bg-gray-100" : "border-l-4 border-l-transparent hover:bg-gray-50"}`}
+        className={`group mx-2 my-2 cursor-pointer rounded-md border border-gray-100 px-3 py-3 transition-all duration-200 ${isActive ? "border-gray-200 bg-gray-100" : "hover:bg-gray-50"}`}
+        onClick={onClick}
       >
-        <div className="cursor-pointer" onClick={onClick}>
-          <h3
-            className={`font-nunito mb-2 line-clamp-2 text-sm font-medium ${isActive ? "text-gray-700" : "text-gray-600"}`}
+        <h3
+          className={`font-nunito mb-2 line-clamp-2 text-sm font-medium cursor-pointer ${isActive ? "text-gray-700" : "text-gray-600"}`}
+        >
+          {decodeHtmlEntities(article.title)}
+        </h3>
+        {article.excerpt && (
+          <p className="font-nunito mb-2 line-clamp-2 text-xs text-gray-400">
+            {decodeHtmlEntities(article.excerpt)}
+          </p>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="font-nunito text-xs text-gray-400">
+            {new Date(article.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+          <button
+            onClick={onDelete}
+            className="cursor-pointer rounded p-1 text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-red-500"
+            aria-label="Delete article"
           >
-            {decodeHtmlEntities(article.title)}
-          </h3>
-          {article.excerpt && (
-            <p className="font-nunito mb-2 line-clamp-2 text-xs text-gray-400">
-              {decodeHtmlEntities(article.excerpt)}
-            </p>
-          )}
-          <div className="flex items-center justify-between">
-            <span className="font-nunito text-xs text-gray-400">
-              {new Date(article.date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-            <button
-              onClick={onDelete}
-              className="cursor-pointer rounded px-2 py-1 text-xs text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-red-500"
-            >
-              Delete
-            </button>
-          </div>
+            <TrashIcon className="h-4 w-4" />
+          </button>
         </div>
       </li>
     );
@@ -231,7 +231,7 @@ export const Sidebar = memo(function Sidebar({
       <div className="scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent flex-1 overflow-y-auto px-2 py-2">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
-            <SmallLoader />
+            <ArrowPathIcon className="h-5 w-5 animate-spin text-gray-500" />
           </div>
         ) : (
           <>
