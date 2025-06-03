@@ -36,6 +36,18 @@ A clean, distraction-free article reading application that lets you save and rea
 5. **Rendering**: The content is rendered with custom React components that prioritize readability and accessibility.
 
 
+## Roadmap
+
+- **Dark Theme**: Implementation of dark mode for comfortable nighttime reading
+- **Mobile Version**: Responsive design optimized for mobile devices
+- **Video Display**: Enhanced support for video content within articles
+- **Chrome Extension**: Browser extension for easy article saving
+- **Article Organization**: Improved management and sorting of saved articles
+- **Tags**: Support for tagging articles for better categorization
+- **Folders**: Ability to organize articles into custom folders
+- **Highlights**: Feature to highlight and save important parts of articles
+- **Reading Progress**: Automatic bookmarking to continue reading from where you left off
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
