@@ -90,7 +90,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         >
           <h1 className="font-nunito flex flex-row items-center justify-center gap-1 text-xl font-semibold text-gray-700">
             <NewspaperIcon className="h-6 w-6 text-gray-700" />
-            Reader
+            Reedr
             <span className="text-xs text-gray-400">(pre-alpha)</span>
           </h1>
         </div>

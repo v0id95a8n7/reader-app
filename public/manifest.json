@@ -1,6 +1,6 @@
 {
-  "name": "Reader App",
-  "short_name": "Reader",
+  "name": "Reedr",
+  "short_name": "Reedr",
   "description": "Clean reading experience for web articles",
   "start_url": "/",
   "display": "standalone",

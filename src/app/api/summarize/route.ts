@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://github.com/yourusername/reader-app",
-        "X-Title": "Reader App"
+        "HTTP-Referer": "https://github.com/yourusername/reedr",
+        "X-Title": "Reedr"
       },
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct:free",

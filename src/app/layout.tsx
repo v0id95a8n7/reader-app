@@ -27,7 +27,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Reader App",
+  title: "Reedr",
   description: "Clean reading experience for web articles",
   manifest: "/manifest.json",
   icons: [
