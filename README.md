@@ -2,6 +2,8 @@
 
 A clean, distraction-free article reading application that lets you save and read articles from the web with a beautiful, customizable reading experience.
 
+![App Screenshot](./assets/reader-app-screenshot.png)
+
 ## Features
 
 - **Clean Reading Experience**: Distraction-free interface for comfortable reading
