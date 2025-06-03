@@ -104,35 +104,10 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
       <button
         ref={buttonRef}
         onClick={toggleSummary}
-        className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-500 hover:bg-gray-100 relative overflow-hidden"
-        style={{
-          background: isOpen 
-            ? 'white' 
-            : 'linear-gradient(-45deg, #6366f1, #8b5cf6, #818cf8, #93c5fd)'
-        }}
+        className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-200 hover:bg-gray-100"
         aria-label="Generate article summary"
       >
-        <div 
-          className={`absolute inset-0 bg-gradient-to-r from-gray-300 via-blue-400 to-purple-500 ${isOpen ? 'opacity-0' : 'opacity-100'}`} 
-          style={{
-            backgroundSize: '400% 400%',
-            animation: 'gradient 3s ease infinite',
-          }}
-        />
-        <style jsx>{`
-          @keyframes gradient {
-            0% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-        `}</style>
-        <SparklesIcon className="h-6 w-6 relative z-10" style={{ color: isOpen ? '#6b7280' : 'white' }} />
+        <SparklesIcon className="h-6 w-6 relative z-10"/>
       </button>
 
       {isOpen && (
