@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { AdjustmentsHorizontalIcon, XMarkIcon, ArrowUpIcon } from "@heroicons/react/24/solid";
-import { ArticleSummary } from "~/components/ArticleSummary";
+import { AdjustmentsHorizontalIcon, XMarkIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { ArticleSummaryWrapper } from "~/components/ArticleSummary";
 
 interface Settings {
   fontSize: number;
@@ -101,7 +101,7 @@ export function FloatingButtons({
 
       {/* Summary Button */}
       {articleContent && articleTitle && (
-        <ArticleSummary
+        <ArticleSummaryWrapper
           articleContent={articleContent}
           articleTitle={articleTitle}
         />
@@ -149,7 +149,7 @@ export function FloatingButtons({
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleFontSizeChange(Math.max(14, settings.fontSize - 1))}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                     aria-label="Decrease font size"
                   >
                     -
@@ -165,7 +165,7 @@ export function FloatingButtons({
                   />
                   <button
                     onClick={() => handleFontSizeChange(Math.min(24, settings.fontSize + 1))}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                     aria-label="Increase font size"
                   >
                     +
@@ -212,7 +212,7 @@ export function FloatingButtons({
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleLineHeightChange(Math.max(1.2, parseFloat((settings.lineHeight - 0.1).toFixed(1))))}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                     aria-label="Decrease line height"
                   >
                     -
@@ -228,7 +228,7 @@ export function FloatingButtons({
                   />
                   <button
                     onClick={() => handleLineHeightChange(Math.min(2.0, parseFloat((settings.lineHeight + 0.1).toFixed(1))))}
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                     aria-label="Increase line height"
                   >
                     +

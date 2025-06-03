@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "~/components/Sidebar";
 import { useSavedArticles } from "~/utils/use-saved-articles";
-import { NewspaperIcon, ArrowRightOnRectangleIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import { NewspaperIcon, ArrowRightOnRectangleIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSession, signOut } from "next-auth/react";
+import { SettingsModal } from "~/components/SettingsModal";
+import { LogoutModal } from "~/components/LogoutModal";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,6 +22,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   const user = session?.user;
   const { articles, isLoading, deleteArticle } = useSavedArticles();
   const [isPending, setIsPending] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const logoutButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (status !== "loading") {
@@ -77,8 +85,18 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     await signOut({ redirect: false });
+    setIsLoggingOut(false);
     void router.push("/login");
+  };
+  
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const handleOpenLogoutModal = () => {
+    setIsLogoutOpen(true);
   };
 
   return (
@@ -91,19 +109,31 @@ export function AppLayout({ children }: AppLayoutProps) {
           <h1 className="font-nunito flex flex-row items-center justify-center gap-1 text-xl font-semibold text-gray-700">
             <NewspaperIcon className="h-6 w-6 text-gray-700" />
             Reedr
-            <span className="text-xs text-gray-400">(pre-alpha)</span>
+            <span className="text-xs text-gray-400 opacity-50">(pre-alpha)</span>
           </h1>
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2 relative">
           {user && (
-            <button
-              onClick={handleLogout}
-              className="flex flex-row items-center gap-2 font-nunito rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-            >
-              <span className="hidden text-gray-600 sm:inline">Sign out</span>
-              <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
-            </button>
+            <>
+              <button
+                ref={settingsButtonRef}
+                onClick={handleOpenSettings}
+                className="flex flex-row items-center gap-2 font-nunito rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                <span className="hidden text-gray-600 sm:inline">Settings</span>
+                <Cog6ToothIcon className="h-5 w-5 text-gray-500" />
+              </button>
+              
+              <button
+                ref={logoutButtonRef}
+                onClick={handleOpenLogoutModal}
+                className="flex flex-row items-center gap-2 font-nunito rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                <span className="hidden text-gray-600 sm:inline">Logout</span>
+                <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
+              </button>
+            </>
           )}
         </div>
       </header>
@@ -138,6 +168,22 @@ export function AppLayout({ children }: AppLayoutProps) {
             )}
           </div>
         </main>
+        
+        {isSettingsOpen && (
+          <SettingsModal
+            onClose={() => setIsSettingsOpen(false)}
+            anchorRef={settingsButtonRef}
+          />
+        )}
+        
+        {isLogoutOpen && (
+          <LogoutModal
+            onClose={() => setIsLogoutOpen(false)}
+            onConfirm={handleLogout}
+            anchorRef={logoutButtonRef}
+            isLoading={isLoggingOut}
+          />
+        )}
       </div>
     </div>
   );

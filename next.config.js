@@ -6,10 +6,10 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // Конфигурация для улучшения производительности
+  // Performance optimization configuration
   reactStrictMode: true,
 
-  // Конфигурация для оптимизации изображений
+  // Image optimization configuration
   images: {
     domains: ["*"],
     remotePatterns: [
@@ -20,11 +20,11 @@ const config = {
     ],
   },
 
-  // Конфигурация для обработки Node.js модулей в браузере
+  // Configuration for handling Node.js modules in browser
   webpack: (config, { isServer }) => {
-    // Только для клиентской сборки
+    // Only for client-side builds
     if (!isServer) {
-      // Полифилы для Node.js модулей
+      // Polyfills for Node.js modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

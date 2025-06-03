@@ -47,15 +47,16 @@ model SavedArticle {
 
 // User reading settings model
 model UserSettings {
-    id          String  @id @default(cuid())
-    userId      String  @unique
-    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    fontSize    Int     @default(18)
-    fontFamily  String  @default("PT Serif")
-    lineHeight  Float   @default(1.6)
-    textAlign   String  @default("left")
-    showImages  Boolean @default(true)
-    showVideos  Boolean @default(true)
+    id              String  @id @default(cuid())
+    userId          String  @unique
+    user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    fontSize        Int     @default(18)
+    fontFamily      String  @default("PT Serif")
+    lineHeight      Float   @default(1.6)
+    textAlign       String  @default("left")
+    showImages      Boolean @default(true)
+    showVideos      Boolean @default(true)
+    showSummaryButton Boolean @default(true)
     
     @@index([userId])
 }

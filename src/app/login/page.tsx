@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { NewspaperIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import { NewspaperIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { signIn, useSession } from "next-auth/react";
 
 export default function LoginPage() {

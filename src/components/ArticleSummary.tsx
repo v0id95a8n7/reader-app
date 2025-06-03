@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowPathIcon, XMarkIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 interface ArticleSummaryProps {
   articleContent: string;
@@ -10,21 +10,141 @@ interface ArticleSummaryProps {
 
 interface SummaryResponseData {
   summary: string;
-  language?: string;
 }
 
 interface ErrorResponseData {
   error: string;
 }
 
+interface UserSummarySettings {
+  showSummaryButton: boolean;
+}
+
+// Wrapper to manage initial button display
+export function ArticleSummaryWrapper(props: ArticleSummaryProps) {
+  const [initialSettingsChecked, setInitialSettingsChecked] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+  
+  useEffect(() => {
+    // Check localStorage immediately when component mounts
+    try {
+      const storedSettings = localStorage.getItem("summarySettings");
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings) as UserSummarySettings;
+        setShowButton(parsedSettings.showSummaryButton !== false);
+      }
+      setInitialSettingsChecked(true);
+    } catch (error) {
+      console.error("Error reading stored summary settings in wrapper:", error);
+      setInitialSettingsChecked(true);
+    }
+  }, []);
+  
+  // Listen for settings update events for instant updates
+  useEffect(() => {
+    const handleSettingsUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{showSummaryButton?: boolean}>;
+      if (customEvent.detail?.showSummaryButton !== undefined) {
+        setShowButton(customEvent.detail.showSummaryButton);
+      }
+    };
+    
+    window.addEventListener("settingsUpdated", handleSettingsUpdated);
+    return () => {
+      window.removeEventListener("settingsUpdated", handleSettingsUpdated);
+    };
+  }, []);
+  
+  // Don't show anything until localStorage check is complete
+  if (!initialSettingsChecked) {
+    return null;
+  }
+  
+  // If settings are checked and button should be shown
+  if (showButton) {
+    return <ArticleSummary {...props} />;
+  }
+  
+  return null;
+}
+
 export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryProps) {
   const [summary, setSummary] = useState<string | null>(null);
-  const [language, setLanguage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [settings, setSettings] = useState<UserSummarySettings>({
+    showSummaryButton: true,
+  });
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  // Check localStorage first for instant settings on initial load
+  useEffect(() => {
+    try {
+      const storedSettings = localStorage.getItem("summarySettings");
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings) as UserSummarySettings;
+        if (parsedSettings.showSummaryButton !== undefined) {
+          setSettings(prevSettings => ({
+            ...prevSettings,
+            showSummaryButton: parsedSettings.showSummaryButton
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error reading stored summary settings:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json() as Partial<UserSummarySettings>;
+          if (data.showSummaryButton !== undefined) {
+            setSettings({
+              showSummaryButton: data.showSummaryButton,
+            });
+            
+            // Save to localStorage for quick access on next load
+            localStorage.setItem("summarySettings", JSON.stringify({ 
+              showSummaryButton: data.showSummaryButton 
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching summary settings:", error);
+      }
+    };
+
+    void fetchSettings();
+  }, []);
+
+  // Listen for settings updates from other components
+  useEffect(() => {
+    const handleSettingsUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{showSummaryButton?: boolean}>;
+      if (customEvent.detail?.showSummaryButton !== undefined) {
+        setSettings(prev => ({
+          ...prev,
+          showSummaryButton: customEvent.detail.showSummaryButton!
+        }));
+        
+        // Save to localStorage for quick access on next load
+        localStorage.setItem("summarySettings", JSON.stringify({ 
+          showSummaryButton: customEvent.detail.showSummaryButton 
+        }));
+      }
+    };
+
+    window.addEventListener("settingsUpdated", handleSettingsUpdated);
+    
+    return () => {
+      window.removeEventListener("settingsUpdated", handleSettingsUpdated);
+    };
+  }, []);
 
   const generateSummary = async () => {
     // If we already have a summary, just open the panel
@@ -56,9 +176,6 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
 
       const data = await response.json() as SummaryResponseData;
       setSummary(data.summary);
-      if (data.language) {
-        setLanguage(data.language);
-      }
     } catch (err) {
       console.error("Error generating summary:", err);
       setError(err instanceof Error ? err.message : "Failed to generate summary");
@@ -93,11 +210,20 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
     };
   }, []);
 
-  // Заголовок диалога в зависимости от языка
-  const dialogTitle = language === 'ru' ? 'Резюме статьи' : 'Article Summary';
-  const loadingText = language === 'ru' ? 'Создание резюме...' : 'Generating summary...';
-  const errorTitle = language === 'ru' ? 'Ошибка' : 'Error';
-  const tryAgainText = language === 'ru' ? 'Попробовать снова' : 'Try Again';
+  // English dialog texts
+  const dialogTexts = {
+    dialogTitle: "Article Summary",
+    loadingText: "Generating summary...",
+    errorTitle: "Error",
+    tryAgainText: "Try Again"
+  };
+
+  // Hide button if settings say to hide
+  const shouldHideButton = !settings.showSummaryButton;
+  
+  if (shouldHideButton) {
+    return null;
+  }
 
   return (
     <div className="relative">
@@ -107,7 +233,7 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
         className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-200 hover:bg-gray-100"
         aria-label="Generate article summary"
       >
-        <SparklesIcon className="h-6 w-6 relative z-10"/>
+        <SparklesIcon className="h-6 w-6 relative"/>
       </button>
 
       {isOpen && (
@@ -119,42 +245,46 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-nunito text-lg font-bold text-gray-700">
-              {dialogTitle}
+              {dialogTexts.dialogTitle}
             </h3>
             <button
               onClick={() => setIsOpen(false)}
-              className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+              className="rounded-lg bg-white p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+              aria-label="Close dialog"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto pr-2">
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-600">
-                <ArrowPathIcon className="h-8 w-8 animate-spin mb-4" />
-                <p>{loadingText}</p>
+          <div className="min-h-[100px]">
+            {isLoading ? (
+              <div className="flex h-32 flex-col items-center justify-center">
+                <ArrowPathIcon className="mb-2 h-8 w-8 animate-spin text-gray-400" />
+                <p className="text-center text-gray-500">
+                  {dialogTexts.loadingText}
+                </p>
               </div>
-            )}
-
-            {error && !isLoading && (
-              <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
-                <p className="mb-2 font-bold">{errorTitle}</p>
-                <p>{error}</p>
+            ) : error ? (
+              <div className="space-y-4">
+                <h4 className="text-md font-semibold text-red-500">
+                  {dialogTexts.errorTitle}
+                </h4>
+                <p className="text-red-400">{error}</p>
                 <button
-                  onClick={generateSummary}
-                  className="mt-3 rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+                  onClick={() => void generateSummary()}
+                  className="mt-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
                 >
-                  {tryAgainText}
+                  {dialogTexts.tryAgainText}
                 </button>
               </div>
-            )}
-
-            {summary && !isLoading && (
-              <div className="prose prose-sm max-w-none text-gray-700">
-                {summary.split("\n").map((paragraph, i) => (
-                  paragraph.trim() ? <p key={i} className="mb-3">{paragraph}</p> : null
-                ))}
+            ) : (
+              <div className="prose max-h-[400px] overflow-y-auto text-gray-700">
+                {summary && (
+                  <div
+                    className="text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: summary }}
+                  ></div>
+                )}
               </div>
             )}
           </div>

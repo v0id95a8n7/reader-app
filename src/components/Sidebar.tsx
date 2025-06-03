@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { decodeHtmlEntities } from "~/utils/html-entities";
 import type { Article } from "~/utils/use-saved-articles";
-import { TrashIcon, ArrowPathIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, ArrowPathIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface SidebarProps {
   articles: Article[];
@@ -107,7 +107,7 @@ const SidebarHeader = memo(function SidebarHeader({
                 onClick={() => setIsAddPopoverOpen(false)}
                 className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
               >
-                <XMarkIcon className="h-4 w-4" />
+                <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
             
@@ -129,17 +129,17 @@ const SidebarHeader = memo(function SidebarHeader({
                 )}
               </div>
               
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddPopoverOpen(false)}
-                  className="font-nunito rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                  className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="font-nunito rounded-md border border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-300 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer"
+                  className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -203,7 +203,7 @@ const ArticleItem = memo(
   }) => {
     return (
       <li
-        className={`group mx-2 my-2 cursor-pointer rounded-md px-3 py-3 transition-all duration-200 ${isActive ? "bg-gray-100" : "hover:bg-gray-50"}`}
+        className={`group mx-2 my-2 cursor-pointer rounded-md px-3 py-3 transition-all duration-200 ${isActive ? "bg-gray-200" : "hover:bg-gray-100"}`}
         onClick={onClick}
       >
         <h3
@@ -378,13 +378,6 @@ export const Sidebar = memo(function Sidebar({
               )}
             </ul>
           </>
-        )}
-
-        {/* Empty state when no article is selected */}
-        {!activeArticleUrl && filteredArticles.length > 0 && pathname === "/" && (
-          <div className="font-nunito mx-2 mt-4 p-4 text-center text-xs text-gray-400 italic border-t border-gray-100">
-            Select an article from the list or add a new one
-          </div>
         )}
       </div>
     </div>

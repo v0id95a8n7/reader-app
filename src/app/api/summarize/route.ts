@@ -5,7 +5,6 @@ import { getServerSession } from "~/utils/auth";
 interface RequestBody {
   content: string;
   title?: string;
-  lang?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -26,11 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Функция для определения языка на основе текста
-    const detectedLang = detectLanguage(content);
     const displayTitle = title ?? "Untitled Article";
-
-    const prompt = createPrompt(displayTitle, content, detectedLang);
+    const prompt = createPrompt(displayTitle, content);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -68,8 +64,7 @@ export async function POST(request: NextRequest) {
     const summary = data.choices[0]?.message?.content ?? "Failed to generate summary";
 
     return NextResponse.json({ 
-      summary,
-      language: detectedLang 
+      summary
     });
     
   } catch (error) {
@@ -81,45 +76,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Функция для определения языка текста по основным паттернам
-function detectLanguage(text: string): string {
-  // Кириллические символы для русского языка
-  const cyrillicPattern = /[\u0400-\u04FF]/g;
-  const cyrillicMatches = text.match(cyrillicPattern);
-  
-  if (cyrillicMatches && cyrillicMatches.length > 10) {
-    return 'ru'; // Русский
-  }
-  
-  // По умолчанию - английский
-  return 'en';
-}
+// Create the prompt for summary generation
+function createPrompt(title: string, content: string): string {
+  const truncatedContent = content.length > 14000 
+    ? content.substring(0, 14000) + "... [content truncated]"
+    : content;
 
-// Создать соответствующий промпт в зависимости от языка
-function createPrompt(title: string, content: string, lang: string): string {
-  if (lang === 'ru') {
-    return `
-Ты профессиональный обозреватель текстов. Твоя задача - создать краткое резюме следующей статьи.
-Сосредоточься на извлечении основных идей и ключевых моментов.
-
-Заголовок статьи: ${title}
-
-Содержание статьи:
-${content.substring(0, 14000)} ${content.length > 14000 ? "... [текст сокращен]" : ""}
-
-Предоставь резюме статьи в виде 3-5 пунктов. Сосредоточься на основных идеях, аргументах и выводах.
-`;
-  } else {
-    return `
+  return `
 You are a professional summarizer. Your task is to create a concise summary of the following article.
 Focus on extracting the main points and key insights.
 
 Article Title: ${title}
 
 Article Content:
-${content.substring(0, 14000)} ${content.length > 14000 ? "... [content truncated]" : ""}
+${truncatedContent}
 
 Provide a summary of the article in 3-5 bullet points. Focus on the main ideas, arguments, and conclusions.
 `;
-  }
 } 

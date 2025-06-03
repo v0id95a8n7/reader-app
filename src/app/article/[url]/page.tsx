@@ -6,7 +6,7 @@ import { Readability } from "@mozilla/readability";
 import {
   ChevronLeftIcon,
   ArrowPathIcon
-} from "@heroicons/react/24/solid";
+} from "@heroicons/react/24/outline";
 import {
   ArticleRenderer,
   type ArticleRendererProps,
@@ -32,7 +32,9 @@ interface ParseResponse {
   error?: string;
 }
 
-type ReaderSettings = ArticleRendererProps["settings"];
+type ReaderSettings = ArticleRendererProps["settings"] & {
+  showSummaryButton?: boolean;
+};
 
 const DEFAULT_SETTINGS: ReaderSettings = {
   fontSize: 18,
@@ -122,6 +124,13 @@ export default function ArticlePage() {
           const data = await response.json() as ReaderSettings;
           setSettings(data);
           setIsSettingsSaved(true);
+          
+          // Make settings immediately available to other components
+          window.dispatchEvent(
+            new CustomEvent("settingsUpdated", {
+              detail: { showSummaryButton: data.showSummaryButton !== false }
+            })
+          );
         } else {
           const savedSettings = localStorage.getItem("readerSettings");
           if (savedSettings) {

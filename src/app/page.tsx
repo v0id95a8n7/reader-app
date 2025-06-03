@@ -1,6 +1,6 @@
 "use client";
 
-import { NewspaperIcon } from "@heroicons/react/24/solid";
+import { NewspaperIcon } from "@heroicons/react/24/outline";
 
 export default function HomePage() {
   return (

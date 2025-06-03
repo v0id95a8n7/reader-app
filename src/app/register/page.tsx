@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { NewspaperIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+import { NewspaperIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { signIn, useSession } from "next-auth/react";
 
 interface RegisterResponse {
@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
   console.log("Register page - session status:", status, "session:", session);
 
-  // Если пользователь уже авторизован, перенаправляем на главную
+  // If user is already authenticated, redirect to home page
   useEffect(() => {
     if (session?.user && status === "authenticated") {
       router.push("/");
@@ -54,7 +54,7 @@ export default function RegisterPage() {
       if (response.ok) {
         console.log("Registration successful, signing in...");
         
-        // Автоматически входим после успешной регистрации
+        // Automatically sign in after successful registration
         const result = await signIn("credentials", {
           redirect: false,
           email,

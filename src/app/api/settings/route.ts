@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "~/utils/auth";
 import { prisma } from "~/server/db";
 
+// In-memory cache to store summary settings that aren't in the database yet
+const userSummarySettings = new Map<string, { 
+  showSummaryButton: boolean;
+}>();
+
 interface SettingsRequest {
   fontSize?: number;
   fontFamily?: string;
@@ -9,6 +14,7 @@ interface SettingsRequest {
   textAlign?: string;
   showImages?: boolean;
   showVideos?: boolean;
+  showSummaryButton?: boolean;
 }
 
 export async function GET(_request: NextRequest) {
@@ -24,6 +30,10 @@ export async function GET(_request: NextRequest) {
       where: { userId: session.user.id },
     });
 
+    const summarySettings = userSummarySettings.get(session.user.id) ?? {
+      showSummaryButton: true
+    };
+
     if (!settings) {
       // Return default settings if not found
       return NextResponse.json({
@@ -33,10 +43,14 @@ export async function GET(_request: NextRequest) {
         textAlign: "left",
         showImages: true,
         showVideos: true,
+        ...summarySettings
       });
     }
 
-    return NextResponse.json(settings);
+    return NextResponse.json({
+      ...settings,
+      ...summarySettings
+    });
   } catch (error) {
     console.error("Get settings error:", error);
     return NextResponse.json(
@@ -88,17 +102,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update or create settings
+    // Update the in-memory summary settings
+    if (body.showSummaryButton !== undefined) {
+      const currentSettings = userSummarySettings.get(session.user.id) ?? {
+        showSummaryButton: true
+      };
+      
+      userSummarySettings.set(session.user.id, {
+        showSummaryButton: body.showSummaryButton ?? currentSettings.showSummaryButton
+      });
+      
+      // Log the change to help with debugging
+      console.log(`Updated summary settings for user ${session.user.id}: showSummaryButton=${body.showSummaryButton}`);
+    }
+
+    // Extract only the database fields
+    const dbSettings = {
+      fontSize: body.fontSize,
+      fontFamily: body.fontFamily,
+      lineHeight: body.lineHeight,
+      textAlign: body.textAlign,
+      showImages: body.showImages,
+      showVideos: body.showVideos,
+    };
+
+    // Update or create settings in database
     const settings = await prisma.userSettings.upsert({
       where: { userId: session.user.id },
-      update: {
-        fontSize: body.fontSize,
-        fontFamily: body.fontFamily,
-        lineHeight: body.lineHeight,
-        textAlign: body.textAlign,
-        showImages: body.showImages,
-        showVideos: body.showVideos,
-      },
+      update: dbSettings,
       create: {
         userId: session.user.id,
         fontSize: body.fontSize ?? 18,
@@ -110,7 +141,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(settings);
+    // Return combined settings
+    const summarySettings = userSummarySettings.get(session.user.id) ?? {
+      showSummaryButton: true
+    };
+
+    return NextResponse.json({
+      ...settings,
+      ...summarySettings
+    });
   } catch (error) {
     console.error("Save settings error:", error);
     return NextResponse.json(
