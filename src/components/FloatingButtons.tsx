@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AdjustmentsHorizontalIcon, XMarkIcon, ArrowUpIcon } from "@heroicons/react/24/solid";
+import { ArticleSummary } from "~/components/ArticleSummary";
 
 interface Settings {
   fontSize: number;
@@ -14,12 +15,16 @@ interface FloatingButtonsProps {
   settings: Settings;
   onSettingsChange: (settings: Settings) => void;
   onScrollToTop: () => void;
+  articleContent?: string;
+  articleTitle?: string;
 }
 
 export function FloatingButtons({
   settings,
   onSettingsChange,
   onScrollToTop,
+  articleContent,
+  articleTitle,
 }: FloatingButtonsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -94,6 +99,15 @@ export function FloatingButtons({
         </button>
       )}
 
+      {/* Summary Button */}
+      {articleContent && articleTitle && (
+        <ArticleSummary
+          articleContent={articleContent}
+          articleTitle={articleTitle}
+        />
+      )}
+
+      {/* Settings Button */}
       <div className="relative">
         <button
           ref={buttonRef}

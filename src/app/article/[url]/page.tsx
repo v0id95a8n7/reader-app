@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useSavedArticles } from "~/utils/use-saved-articles";
 import { Readability } from "@mozilla/readability";
 import {
   ChevronLeftIcon,
-  ChevronRightIcon,
   ArrowPathIcon
 } from "@heroicons/react/24/solid";
 import {
@@ -110,8 +108,7 @@ export default function ArticlePage() {
 
   const router = useRouter();
   const params = useParams();
-  const { articles } = useSavedArticles();
-
+  
   const urlParam = params.url as string;
   const decodedUrl = decodeURIComponent(urlParam);
 
@@ -180,42 +177,6 @@ export default function ArticlePage() {
       router.push("/");
     });
   }, [router]);
-
-  const navigateToArticle = useCallback(
-    (url: string) => {
-      if (!articleCache.has(url)) {
-        void fetch(`/api/parse?url=${encodeURIComponent(url)}`)
-          .then((response) => response.json())
-          .then((data: ParseResponse) => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.html, "text/html");
-            const reader = new Readability(doc);
-            const parsedArticle = reader.parse();
-
-            if (parsedArticle) {
-              const articleContent: ArticleContent = {
-                title: parsedArticle.title ?? "Untitled",
-                content: parsedArticle.content ?? "",
-                byline: parsedArticle.byline,
-                siteName: parsedArticle.siteName,
-                excerpt: parsedArticle.excerpt,
-                publishedTime: extractPublishedTime(data.html),
-                lang: parsedArticle.lang,
-              };
-
-              articleCache.set(url, articleContent);
-            }
-          })
-          .catch((err) => console.error("Error prefetching article:", err));
-      }
-
-      startTransition(() => {
-        const encodedUrl = encodeURIComponent(url);
-        router.push(`/article/${encodedUrl}`);
-      });
-    },
-    [router],
-  );
 
   const fetchArticle = useCallback(async (url: string) => {
     if (articleCache.has(url)) {
@@ -309,28 +270,7 @@ export default function ArticlePage() {
         return;
       }
 
-      const currentIndex = articles.findIndex(
-        (article) => article.url === decodedUrl,
-      );
-      if (currentIndex === -1) return;
-
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        const prevIndex =
-          currentIndex > 0 ? currentIndex - 1 : articles.length - 1;
-        const prevArticle = articles[prevIndex];
-        if (prevArticle) {
-          e.preventDefault();
-          navigateToArticle(prevArticle.url);
-        }
-      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        const nextIndex =
-          currentIndex < articles.length - 1 ? currentIndex + 1 : 0;
-        const nextArticle = articles[nextIndex];
-        if (nextArticle) {
-          e.preventDefault();
-          navigateToArticle(nextArticle.url);
-        }
-      } else if (e.key === "Escape") {
+      if (e.key === "Escape") {
         e.preventDefault();
         handleGoBack();
       }
@@ -340,7 +280,7 @@ export default function ArticlePage() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [articles, decodedUrl, handleGoBack, navigateToArticle]);
+  }, [handleGoBack]);
 
   const handleSettingsChange = (newSettings: ReaderSettings) => {
     setSettings(newSettings);
@@ -369,13 +309,6 @@ export default function ArticlePage() {
       console.log("Relative link clicked:", url);
     }
   };
-
-  const currentIndex = articles.findIndex(
-    (article) => article.url === decodedUrl,
-  );
-  const prevArticle = currentIndex > 0 ? articles[currentIndex - 1] : null;
-  const nextArticle =
-    currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
 
   if (isLoading || isPending || !isSettingsLoaded) {
     return (
@@ -468,6 +401,8 @@ export default function ArticlePage() {
             settings={settings}
             onSettingsChange={handleSettingsChange}
             onScrollToTop={handleScrollToTop}
+            articleContent={article.content}
+            articleTitle={article.title}
           />
         </>
       ) : null}
