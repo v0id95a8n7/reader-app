@@ -26,6 +26,35 @@ A clean, distraction-free article reading application that lets you save and rea
 - **State Management**: React Context and Hooks
 - **UI Components**: Custom components with [Heroicons](https://heroicons.com/)
 - **Fonts**: Google Fonts (Nunito, PT Serif, PT Sans)
+- **Package Manager**: [Bun](https://bun.sh/) - Fast JavaScript runtime and package manager
+
+## Package Management
+
+This project uses [Bun](https://bun.sh/) as the primary package manager for faster installations and better performance. You can also use npm if preferred.
+
+### Using Bun
+```bash
+# Install dependencies
+bun install
+
+# Run development server
+bun dev
+
+# Build for production
+bun run build
+```
+
+### Using npm
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ## How It Works
 
