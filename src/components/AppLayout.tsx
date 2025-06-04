@@ -38,6 +38,20 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
   }, [session, status, pathname, router]);
 
+  useEffect(() => {
+    setIsSettingsOpen(false);
+    setIsLogoutOpen(false);
+    setIsLoggingOut(false);
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setIsSettingsOpen(false);
+      setIsLogoutOpen(false);
+      setIsLoggingOut(false);
+    }
+  }, [status]);
+
   if (isAuthLoading) {
     return (
       <div className="font-nunito flex min-h-screen items-center justify-center bg-gray-50">
@@ -99,6 +113,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     setIsLoggingOut(true);
     await signOut({ redirect: false });
     setIsLoggingOut(false);
+    setIsLogoutOpen(false);
     void router.push("/login");
   };
   
@@ -185,14 +200,14 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </main>
         
-        {isSettingsOpen && (
+        {isSettingsOpen && user && (
           <SettingsModal
             onClose={() => setIsSettingsOpen(false)}
             anchorRef={settingsButtonRef}
           />
         )}
         
-        {isLogoutOpen && (
+        {isLogoutOpen && user && (
           <LogoutModal
             onClose={() => setIsLogoutOpen(false)}
             onConfirm={handleLogout}
