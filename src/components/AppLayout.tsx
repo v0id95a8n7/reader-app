@@ -92,11 +92,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
   
   const handleOpenSettings = () => {
-    setIsSettingsOpen(true);
+    setIsSettingsOpen(prevState => !prevState);
+    if (isLogoutOpen) {
+      setIsLogoutOpen(false);
+    }
   };
 
   const handleOpenLogoutModal = () => {
-    setIsLogoutOpen(true);
+    setIsLogoutOpen(prevState => !prevState);
+    if (isSettingsOpen) {
+      setIsSettingsOpen(false);
+    }
   };
 
   return (
