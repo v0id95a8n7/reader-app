@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { decodeHtmlEntities } from "~/utils/html-entities";
 import type { Article } from "~/utils/use-saved-articles";
 import { TrashIcon, ArrowPathIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -9,7 +9,7 @@ interface SidebarProps {
   _currentPath: string;
   onArticleClick: (url: string) => void;
   onDeleteArticle: (id: string) => void;
-  onAddArticle: () => void;
+  onAddArticle: (url?: string) => Promise<void>;
   _currentUser?: string;
   _onLogout: () => void;
   isLoading: boolean;
@@ -251,6 +251,7 @@ export const Sidebar = memo(function Sidebar({
   _onLogoClick,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeArticleUrl, setActiveArticleUrl] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -313,10 +314,10 @@ export const Sidebar = memo(function Sidebar({
         throw new Error(errorData.error ?? "Failed to save article");
       }
 
-      onAddArticle();
+      await onAddArticle(data.url);
 
       const encodedUrl = encodeURIComponent(data.url);
-      window.location.href = `/article/${encodedUrl}`;
+      router.push(`/article/${encodedUrl}`);
     } catch (error: unknown) {
       console.error("Error submitting URL:", error);
 
