@@ -20,7 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { data: session, status } = useSession();
   const isAuthLoading = status === "loading";
   const user = session?.user;
-  const { articles, isLoading, deleteArticle } = useSavedArticles();
+  const { articles, isLoading, deleteArticle, refreshArticles } = useSavedArticles();
   const [isPending, setIsPending] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
@@ -70,7 +70,18 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const handleDeleteArticle = async (id: string) => {
     try {
+      // Find the article being deleted to get its URL
+      const articleToDelete = articles.find(article => article.id === id);
+      
       await deleteArticle(id);
+      
+      // If the deleted article is currently open, redirect to home page
+      if (articleToDelete && pathname.includes('/article/')) {
+        const currentUrl = decodeURIComponent(pathname.replace('/article/', ''));
+        if (currentUrl === articleToDelete.url) {
+          void router.push('/');
+        }
+      }
     } catch (error) {
       console.error("Failed to delete article:", error);
     }
@@ -80,8 +91,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     void router.push("/");
   };
 
-  const handleSaveArticle = (): void => {
-    return;
+  const handleSaveArticle = async (_url?: string): Promise<void> => {
+    await refreshArticles();
   };
 
   const handleLogout = async () => {
