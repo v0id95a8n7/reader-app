@@ -20,6 +20,13 @@ interface UserSummarySettings {
   showSummaryButton: boolean;
 }
 
+interface ChatMessage {
+  id: string;
+  type: 'question' | 'answer' | 'error';
+  content: string;
+  timestamp: Date;
+}
+
 // Wrapper to manage initial button display
 export function ArticleSummaryWrapper(props: ArticleSummaryProps) {
   const [initialSettingsChecked, setInitialSettingsChecked] = useState(false);
@@ -73,11 +80,68 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
   const [settings, setSettings] = useState<UserSummarySettings>({
     showSummaryButton: true,
   });
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Generate a unique key for this article's chat history
+  const chatStorageKey = `articleChat_${articleTitle}_${articleContent.slice(0, 100).replace(/[^a-zA-Z0-9]/g, '')}`;
+  
+  // Clear summary and chat when navigating to a different article
+  useEffect(() => {
+    // Reset state when article changes
+    setSummary(null);
+    setChatMessages([]);
+    setError(null);
+    setIsOpen(false);
+    setFollowUpQuestion("");
+    setIsFollowUpLoading(false);
+    
+    // Also clear localStorage for the previous article
+    try {
+      // Clear all article chat histories
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('articleChat_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    } catch (error) {
+      console.error("Error clearing chat histories:", error);
+    }
+  }, [articleContent, articleTitle]);
+  
+  // Load chat history from localStorage after clearing state
+  useEffect(() => {
+    try {
+      const storedChat = localStorage.getItem(chatStorageKey);
+      if (storedChat) {
+        const parsedChat = JSON.parse(storedChat) as ChatMessage[];
+        setChatMessages(parsedChat);
+      }
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+    }
+  }, [chatStorageKey]);
+  
+  // Save chat history to localStorage whenever it changes
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      try {
+        localStorage.setItem(chatStorageKey, JSON.stringify(chatMessages));
+      } catch (error) {
+        console.error("Error saving chat history:", error);
+      }
+    }
+  }, [chatMessages, chatStorageKey]);
   
   // Check localStorage first for instant settings on initial load
   useEffect(() => {
@@ -184,9 +248,83 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
     }
   };
 
+  const handleFollowUpQuestion = async () => {
+    if (!followUpQuestion.trim() || !summary) return;
+
+    const questionText = followUpQuestion.trim();
+    const questionId = Date.now().toString();
+    
+    // Add question to chat
+    const questionMessage: ChatMessage = {
+      id: questionId,
+      type: 'question',
+      content: questionText,
+      timestamp: new Date()
+    };
+    
+    setChatMessages(prev => [...prev, questionMessage]);
+    setFollowUpQuestion(""); // Clear input immediately
+    setIsFollowUpLoading(true);
+
+    try {
+      const response = await fetch("/api/summarize/followup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: articleContent,
+          title: articleTitle,
+          summary: summary,
+          question: questionText,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json() as ErrorResponseData;
+        throw new Error(errorData.error ?? "Failed to get answer");
+      }
+
+      const data = await response.json() as { answer: string };
+      
+      // Add answer to chat
+      const answerMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'answer',
+        content: data.answer,
+        timestamp: new Date()
+      };
+      
+      setChatMessages(prev => [...prev, answerMessage]);
+    } catch (err) {
+      console.error("Error getting follow-up answer:", err);
+      
+      // Add error to chat
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'error',
+        content: err instanceof Error ? err.message : "Failed to get answer",
+        timestamp: new Date()
+      };
+      
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsFollowUpLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void handleFollowUpQuestion();
+    }
+  };
+
   const toggleSummary = () => {
     if (isOpen) {
       setIsOpen(false);
+      // Only clear the input field, preserve chat history
+      setFollowUpQuestion("");
     } else {
       void generateSummary();
     }
@@ -201,6 +339,8 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
         !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+        // Only clear the input field, preserve chat history
+        setFollowUpQuestion("");
       }
     }
 
@@ -209,6 +349,40 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, isFollowUpLoading]);
+
+  // Additional auto-scroll after AI response is complete
+  useEffect(() => {
+    if (!isFollowUpLoading && chatMessages.length > 0) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        if (chatScrollRef.current) {
+          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [isFollowUpLoading, chatMessages]);
+
+  // Additional auto-scroll specifically after AI responses complete
+  useEffect(() => {
+    if (!isFollowUpLoading && chatMessages.length > 0) {
+      const lastMessage = chatMessages[chatMessages.length - 1];
+      if (lastMessage && (lastMessage.type === 'answer' || lastMessage.type === 'error')) {
+        // Use setTimeout to ensure DOM has updated
+        setTimeout(() => {
+          if (chatScrollRef.current) {
+            chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+          }
+        }, 100);
+      }
+    }
+  }, [isFollowUpLoading, chatMessages]);
 
   // English dialog texts
   const dialogTexts = {
@@ -230,7 +404,7 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
       <button
         ref={buttonRef}
         onClick={toggleSummary}
-        className="cursor-pointer rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-md transition-all duration-200 hover:bg-gray-100"
+        className="rounded-full border border-gray-200 bg-white p-3 text-gray-500 shadow-lg transition-all duration-200 hover:bg-gray-50 cursor-pointer"
         aria-label="Generate article summary"
       >
         <SparklesIcon className="h-6 w-6 relative"/>
@@ -241,22 +415,28 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
           ref={popoverRef}
           role="dialog"
           aria-modal="true"
-          className="font-nunito absolute bottom-full right-0 mb-2 w-96 transform rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-all duration-300 ease-in-out"
+          className="font-nunito absolute bottom-full right-0 mb-2 w-[28rem] max-w-[90vw] max-h-[600px] transform rounded-lg border border-gray-200 bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col"
         >
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-nunito text-lg font-bold text-gray-700">
-              {dialogTexts.dialogTitle}
-            </h3>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="rounded-lg bg-white p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
-              aria-label="Close dialog"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+          <div className="flex-shrink-0 p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <h3 className="font-nunito text-lg font-bold text-gray-700">
+                {dialogTexts.dialogTitle}
+              </h3>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  // Only clear the input field, preserve chat history
+                  setFollowUpQuestion("");
+                }}
+                className="rounded-md border border-gray-300 bg-white p-1 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="min-h-[100px]">
+          <div className="flex-1 overflow-y-auto p-6">
             {isLoading ? (
               <div className="flex h-32 flex-col items-center justify-center">
                 <ArrowPathIcon className="mb-2 h-8 w-8 animate-spin text-gray-400" />
@@ -272,18 +452,86 @@ export function ArticleSummary({ articleContent, articleTitle }: ArticleSummaryP
                 <p className="text-red-400">{error}</p>
                 <button
                   onClick={() => void generateSummary()}
-                  className="mt-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                  className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
                 >
                   {dialogTexts.tryAgainText}
                 </button>
               </div>
             ) : (
-              <div className="prose max-h-[400px] overflow-y-auto text-gray-700">
+              <div className="space-y-4 flex flex-col h-full">
+                <div className="prose text-gray-700">
+                  {summary && (
+                    <div
+                      className="text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: summary }}
+                    ></div>
+                  )}
+                </div>
+                
+                {/* Chat Section */}
                 {summary && (
-                  <div
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: summary }}
-                  ></div>
+                  <div className="border-t border-gray-100 pt-4 flex flex-col flex-1 min-h-0">
+                    {/* Chat Messages */}
+                    <div 
+                      ref={chatScrollRef}
+                      className="flex-1 overflow-y-auto space-y-3 mb-3"
+                    >
+                      {chatMessages.map((message) => (
+                        <div key={message.id} className={`flex ${
+                          message.type === 'question' ? 'justify-end' : 'justify-start'
+                        }`}>
+                          <div className={`max-w-[80%] rounded-xl px-4 py-2 ${
+                            message.type === 'question' 
+                              ? 'bg-blue-500 text-white rounded-br-md' 
+                              : message.type === 'error'
+                              ? 'bg-red-500 text-white rounded-bl-md'
+                              : 'bg-gray-200 text-gray-800 rounded-bl-md'
+                          }`}>
+                            <div 
+                              className="text-sm leading-relaxed"
+                              dangerouslySetInnerHTML={{ __html: message.content }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Loading indicator */}
+                      {isFollowUpLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-gray-200 text-gray-800 rounded-xl rounded-bl-md px-4 py-2 max-w-[80%]">
+                            <div className="flex items-center text-sm">
+                              <ArrowPathIcon className="h-4 w-4 animate-spin mr-2" />
+                              Thinking...
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Input Section */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={followUpQuestion}
+                        onChange={(e) => setFollowUpQuestion(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Ask a follow-up question..."
+                        className="font-nunito flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+                        disabled={isFollowUpLoading}
+                      />
+                      <button
+                        onClick={() => void handleFollowUpQuestion()}
+                        disabled={!followUpQuestion.trim() || isFollowUpLoading}
+                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        {isFollowUpLoading ? (
+                          <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Ask"
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
