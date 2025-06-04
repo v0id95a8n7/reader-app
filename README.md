@@ -11,6 +11,7 @@ A clean, distraction-free article reading application that lets you save and rea
 - **User Accounts**: Secure authentication system to access your article library
 - **Customizable Settings**: Adjust font size, font family, line height, and text alignment
 - **Image & Video Control**: Toggle visibility of images and videos within articles
+- **Article Summarization**: Generate concise summaries of articles using OpenRouter.ai with the Mistral 7B Instruct model
 
 ## Tech Stack
 
@@ -26,6 +27,7 @@ A clean, distraction-free article reading application that lets you save and rea
 - **State Management**: React Context and Hooks
 - **UI Components**: Custom components with [Heroicons](https://heroicons.com/)
 - **Fonts**: Google Fonts (Nunito, PT Serif, PT Sans)
+- **AI Integration**: [OpenRouter.ai](https://openrouter.ai/) with Mistral 7B Instruct model for article summarization
 - **Package Manager**: [Bun](https://bun.sh/) - Fast JavaScript runtime and package manager
 
 ## How It Works
@@ -35,6 +37,7 @@ A clean, distraction-free article reading application that lets you save and rea
 3. **Data Storage**: Articles are stored in a SQLite database through Prisma ORM, associated with the user's account.
 4. **User Settings**: Reading preferences (font size, family, etc.) are persisted to both localStorage and the server.
 5. **Rendering**: The content is rendered with custom React components that prioritize readability and accessibility.
+6. **Article Summarization**: Users can generate concise summaries of articles directly in the reading view, powered by OpenRouter.ai's Mistral 7B Instruct model.
 
 
 ## Roadmap
@@ -70,4 +73,5 @@ This project is licensed under the Business Source License 1.1 (BUSL-1.1)
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Prisma](https://www.prisma.io/) for database access
 - [tRPC](https://trpc.io/) for type-safe APIs
+- [OpenRouter.ai](https://openrouter.ai/) for AI model access
 
